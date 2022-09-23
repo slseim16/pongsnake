@@ -6,6 +6,6 @@ This is done on the STM32G071 Nucleo-64.
 
 Branch Sseim is focused on changing the input device to keypad.
 
-Branch bradynh is focused on adding a buzzer and changing queue to circular
+Branch bradynh is focused on adding a buzzer and changing queue to circular.
 
-
+Branch seand is focused on changing snake gameplay to pong gameplay.
