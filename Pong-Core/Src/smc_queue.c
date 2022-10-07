@@ -9,8 +9,6 @@
 #include "smc_queue.h"
 #include "snake_enums.h"
 
-//NOTE head and tail here are NOT references to SNAKE but rather elements of the Queue itself
-
 Smc_queue* smc_queue_init(Smc_queue* q){
 	q->head = 0;
 	q->tail= 0;
