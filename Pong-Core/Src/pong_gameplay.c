@@ -46,8 +46,12 @@ enum pong_ball_dirs pong_opposite_direction(enum pong_ball_dirs d){
 const XY_PT error_bar[ERROR_DISPLAY_BLOCK_COUNT] = ERROR_DISPLAY_BAD_HEADING;		//Used for error codes
 bool pong_sphere_plot(pong_board *pb){
 	bool ok = true;
-	int8_t x = pb->pong_sphere.x;
-	int8_t y = pb->pong_sphere.y;
+
+	//Guard clauses for Pong Sphere
+	if(pb->pong_sphere)
+
+	int8_t x = pb->ball->loc.x;
+	int8_t y = pb->ball->loc.y;
 	b[x][y] = pb->ball->ball_object;
 
 
@@ -73,7 +77,7 @@ bool pong_sphere_plot(pong_board *pb){
 
 bool paddle_plot(pong_board *pb){
 //	// If the fruit already plotted, or the ground is clear = ok!
-//	bool ok = true;
+	bool ok = true;
 //	if (b[s->fruit.x][s->fruit.y] == -1) ok = true;
 //	else if (b[s->fruit.x][s->fruit.y] == 0){
 //		ok = true;
@@ -89,6 +93,17 @@ bool paddle_plot(pong_board *pb){
 
 	int8_t rx = pb->paddle_R->loc.x;
 	int8_t ry = pb->paddle_R->loc.y;
+
+	//Guard clause for paddles NOTE MAGIC NUMBERS
+	if(pb->paddle_L.loc.x <=0 || pb->paddle_L >= 5){
+		ok = false;
+		return ok;
+	}
+
+	if(pb->paddle_R.loc.x <=0 || pb->paddle_R >= 5){
+		ok = false;
+		return ok;
+	}
 
 	//Plots the paddles
 	for(int n=0; n<PADDLE_WIDTH; n++){
@@ -112,6 +127,48 @@ bool paddle_plot(pong_board *pb){
 	return ok;
 }
 
+
+void paddle_L_shuffle(pong_board* pb, Q_data* q){
+	//State machine for determining how to modify the loc of paddle_L then plotting it
+
+	//Guard clause for paddles NOTE MAGIC NUMBERS
+	if(pb->paddle_L.loc.x <=0 || pb->paddle_L >= 5){
+		return;
+	}
+
+	switch(q->movement){
+	case UP:
+		pb->paddle_L->loc.x++;
+		break;
+	case DOWN:
+		pb->paddle_L->loc.x--;
+		break;
+	default:
+		break;
+	}
+	paddle_plot(pb);
+}
+
+void paddle_R_shuffle(pong_board* pb, Q_data* q){
+	//State machine for determining how to modify the loc of paddle_L then plotting it
+
+	//Guard clause for paddles NOTE MAGIC NUMBERS
+	if(pb->paddle_R.loc.x <=0 || pb->paddle_R >= 5){
+		return;
+	}
+
+	switch(q->movement){
+	case UP:
+		pb->paddle_R->loc.x++;
+		break;
+	case DOWN:
+		pb->paddle_R->loc.x--;
+		break;
+	default:
+		break;
+	}
+	paddle_plot(pb);
+}
 
 // snake_board_init (obvious - sets head, tail, vertebra directions & length, first fruit)
 void pong_game_init(pong_board* pb){
@@ -280,7 +337,6 @@ XY_PT find_next_head(snake_game* s){
 	return square;
 }
 
-
 void pong_periodic_play(pong_board* pb){
 //	// Get a fresh plot of the board to check for legal & fruit moves:
 //	static int8_t board[CHECKS_WIDE][CHECKS_WIDE];
@@ -304,6 +360,7 @@ void pong_periodic_play(pong_board* pb){
 	//	Checking collision between paddle and ball
 	//	Calling function to determine direction
 	//	Checking collision between paddle and floor/ceiling
+
 
 //	XY_PT next_head = find_next_head(s);
 
