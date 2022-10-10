@@ -44,13 +44,11 @@ enum pong_ball_dirs pong_opposite_direction(enum pong_ball_dirs d){
 // matrix of directions. 0 = empty, F = fruit, and the
 // compass directions = a snake segment's direction of travel.
 const XY_PT error_bar[ERROR_DISPLAY_BLOCK_COUNT] = ERROR_DISPLAY_BAD_HEADING;		//Used for error codes
-bool pong_sphere_plot(const pong_board *pb, int8_t b[CHECKS_WIDE][CHECKS_WIDE]){
+bool pong_sphere_plot(pong_board *pb){
 	bool ok = true;
 	int8_t x = pb->pong_sphere.x;
 	int8_t y = pb->pong_sphere.y;
 	b[x][y] = pb->ball->ball_object;
-
-	//Decides where the ball should go next
 
 
 //	// Plot each vertebra.
@@ -73,17 +71,44 @@ bool pong_sphere_plot(const pong_board *pb, int8_t b[CHECKS_WIDE][CHECKS_WIDE]){
 	return ok;
 }
 
-bool paddle_plot(const snake_game *s, int8_t b[CHECKS_WIDE][CHECKS_WIDE]){
-	// If the fruit already plotted, or the ground is clear = ok!
-	bool ok = true;
-	if (b[s->fruit.x][s->fruit.y] == -1) ok = true;
-	else if (b[s->fruit.x][s->fruit.y] == 0){
-		ok = true;
-		b[s->fruit.x][s->fruit.y] = -1;
+bool paddle_plot(pong_board *pb){
+//	// If the fruit already plotted, or the ground is clear = ok!
+//	bool ok = true;
+//	if (b[s->fruit.x][s->fruit.y] == -1) ok = true;
+//	else if (b[s->fruit.x][s->fruit.y] == 0){
+//		ok = true;
+//		b[s->fruit.x][s->fruit.y] = -1;
+//	}
+//	else{
+//		ok = false;
+//	}
+
+	//Get the loc for L&R paddles
+	int8_t lx = pb->paddle_L->loc.x;
+	int8_t ly = pb->paddle_L->loc.y;
+
+	int8_t rx = pb->paddle_R->loc.x;
+	int8_t ry = pb->paddle_R->loc.y;
+
+	//Plots the paddles
+	for(int n=0; n<PADDLE_WIDTH; n++){
+		lx += n;
+		pb->board[lx][ly] = pb->paddle_L->paddle_object;
 	}
-	else{
-		ok = false;
+	for(int i=0; i<PADDLE_HEIGHT; i++){
+		ly += i;
+		pb->board[lx][ly] = pb->paddle_L->paddle_object;
 	}
+
+	for(int n=0; n<PADDLE_WIDTH; n++){
+		lx += n;
+		pb->board[lx][ly] = pb->paddle_R->paddle_object;
+	}
+	for(int i=0; i<PADDLE_HEIGHT; i++){
+		ly += i;
+		pb->board[lx][ly] = pb->paddle_R->paddle_object;
+	}
+
 	return ok;
 }
 
@@ -256,65 +281,71 @@ XY_PT find_next_head(snake_game* s){
 }
 
 
-void pong_periodic_play(snake_game* s){
-	// Get a fresh plot of the board to check for legal & fruit moves:
-	static int8_t board[CHECKS_WIDE][CHECKS_WIDE];
-	// Always clear the board and redraw it.
-	for (int x = 0; x < CHECKS_WIDE; x++){
-		for (int y = 0; y < CHECKS_WIDE; y++){
-			board[x][y] = 0;
-		}
-	}
+void pong_periodic_play(pong_board* pb){
+//	// Get a fresh plot of the board to check for legal & fruit moves:
+//	static int8_t board[CHECKS_WIDE][CHECKS_WIDE];
+//	// Always clear the board and redraw it.
+//	for (int x = 0; x < CHECKS_WIDE; x++){
+//		for (int y = 0; y < CHECKS_WIDE; y++){
+//			board[x][y] = 0;
+//		}
+//	}
 	bool ok;
-	ok = pong_sphere_plot(s, board) && paddle_plot(s, board); // Will happen l-to-r.
+	ok = pong_sphere_plot(pb) && paddle_plot(pb); // Will happen l-to-r. NOTE as-is it will always be true
 	if (!ok) {
 		display_checkerboard();
 		for (volatile int32_t n = 0 ; n< BIG_DELAY_COUNT; n++);
-		pong_game_init(s);
-		pong_sphere_plot(s, board);
+		pong_game_init(pb);
+		pong_sphere_plot(pb);
 	}
 
-	XY_PT next_head = find_next_head(s);
+	//TODO PONG RULES GO HERE
+	//Such as
+	//	Checking collision between paddle and ball
+	//	Calling function to determine direction
+	//	Checking collision between paddle and floor/ceiling
 
-	// Check for snake self-bite
-	if (board[next_head.x][next_head.y] >= 1){
-		// CRASH!
-		while(1);
-	}
+//	XY_PT next_head = find_next_head(s);
 
-	// Is the heading a normal move into an empty cell?
-	else if (board[next_head.x][next_head.y] == 0){
-		s->head.x = next_head.x;
-		s->head.y = next_head.y;
-		// Start at the last element in the spine.
-		// Vertebra[n] moves forward into the cell
-		// previously occuppied by Vertebra[n-1], and
-		// it inherits not only the cell, but also the
-		// heading of Vertebra[n-1] - so copy the heading
-		// from V[n-1] to V[n], and then let the head, AKA
-		// Vertebra[0], take the user-controlled Heading as
-		// its direction.
-		// There are length-1 Vertebrae, but only length-2
-		// connections between them.
-		for (int n = (s->length - 2); n>0; n--){
-			s->vertebra[n] = s->vertebra[n-1];
-		}
-		s->vertebra[0] = pong_opposite_direction(s->heading);
-	}
+//	// Check for snake self-bite
+//	if (board[next_head.x][next_head.y] >= 1){
+//		// CRASH!
+//		while(1);
+//	}
 
-	// Is this a move into fruit?
-	else if (board[next_head.x][next_head.y] == -1)
-	{
-		s->length++;
-		snake_place_fruit(s, (const int8_t(*)[CHECKS_WIDE]) board);
-		s->head.x = next_head.x;
-		s->head.y = next_head.y;
-		// Slither all vertebrae fwd with a for-loop and add a new
-		// head - and keep the old tail.
-		for (int n = (s->length - 2); n>0; n--){
-			s->vertebra[n] = s->vertebra[n-1];
-		}
-		s->vertebra[0] = pong_opposite_direction(s->heading);
-	}
+//	// Is the heading a normal move into an empty cell?
+//	else if (board[next_head.x][next_head.y] == 0){
+//		s->head.x = next_head.x;
+//		s->head.y = next_head.y;
+//		// Start at the last element in the spine.
+//		// Vertebra[n] moves forward into the cell
+//		// previously occuppied by Vertebra[n-1], and
+//		// it inherits not only the cell, but also the
+//		// heading of Vertebra[n-1] - so copy the heading
+//		// from V[n-1] to V[n], and then let the head, AKA
+//		// Vertebra[0], take the user-controlled Heading as
+//		// its direction.
+//		// There are length-1 Vertebrae, but only length-2
+//		// connections between them.
+//		for (int n = (s->length - 2); n>0; n--){
+//			s->vertebra[n] = s->vertebra[n-1];
+//		}
+//		s->vertebra[0] = pong_opposite_direction(s->heading);
+//	}
+
+//	// Is this a move into fruit?
+//	else if (board[next_head.x][next_head.y] == -1)
+//	{
+//		s->length++;
+//		snake_place_fruit(s, (const int8_t(*)[CHECKS_WIDE]) board);
+//		s->head.x = next_head.x;
+//		s->head.y = next_head.y;
+//		// Slither all vertebrae fwd with a for-loop and add a new
+//		// head - and keep the old tail.
+//		for (int n = (s->length - 2); n>0; n--){
+//			s->vertebra[n] = s->vertebra[n-1];
+//		}
+//		s->vertebra[0] = pong_opposite_direction(s->heading);
+//	}
 }
 

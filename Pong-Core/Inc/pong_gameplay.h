@@ -51,10 +51,10 @@ enum pong_ball_dirs pong_opposite_direction(enum pong_ball_dirs d);
 void pong_game_init(pong_board* pb);
 void snake_game_cleanup(snake_game* s);
 void snake_heading_update(snake_game* snake, Smc_queue* q);
-void pong_periodic_play(snake_game *snake);
+void pong_periodic_play(pong_board* pb);
 void snake_place_fruit(snake_game * s, const int8_t b[CHECKS_WIDE][CHECKS_WIDE]);
-bool pong_sphere_plot(const snake_game *s, int8_t b[CHECKS_WIDE][CHECKS_WIDE]);
-bool paddle_plot(const snake_game *s, int8_t b[CHECKS_WIDE][CHECKS_WIDE]);
+bool pong_sphere_plot(pong_board *pb);
+bool paddle_plot(pong_board *pb);
 
 #endif /* PONG_GAMEPLAY_H_ */
 

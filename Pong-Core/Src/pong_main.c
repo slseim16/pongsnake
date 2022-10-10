@@ -122,14 +122,14 @@ void pong_main(void){
 
 	// INITIALIZE THE GAME
 	// Construct the model "game" object:
-	snake_game my_game;
+	pong_board my_game;
 	volatile uint16_t ram_dummy_1 = MEMORY_BARRIER_1;
 	pong_game_init(&my_game);
 
-	// Construct IPC
-	Smc_queue turn_q;
+	// Construct IPC REAMKE FOR KEYPAD & PONG
+	Smc_queue shuffle_q;		//Refactored to shuffle_q because it makes more sense for pong than turn
 	volatile uint16_t ram_dummy_2 = MEMORY_BARRIER_2;
-	smc_queue_init(&turn_q);
+	smc_queue_init(&shuffle_q);
 
 	// Input object
 	QuadKnob user_knob_1;
@@ -183,9 +183,9 @@ void pong_main(void){
 			if (user_knob_1.get(&user_knob_1) != QUADKNOB_STILL){
 				Q_data command_packet;
 				command_packet.twist = user_knob_1.get(&user_knob_1);
-				turn_q.put(&turn_q, &command_packet);
+				shuffle_q.put(&shuffle_q, &command_packet);
 			}
-			snake_heading_update(&my_game, &turn_q);
+			snake_heading_update(&my_game, &shuffle_q);
 		// ASSERT HEADING IS VALID
 			while ((my_game.heading != SNAKE_COMPASS_N)&&
 					(my_game.heading != SNAKE_COMPASS_E)&&
@@ -201,7 +201,7 @@ void pong_main(void){
 		}
 #endif
 #ifdef TEST_WITHOUT_INPUT
-		static int turns = 0;
+		static int shuffles = 0;
 		// Normally "check for user input every 1 ms & show" - here just update display
 		if (prior_timer_countdown != timer_isr_countdown ){
 			prior_timer_countdown = timer_isr_countdown;
@@ -210,15 +210,15 @@ void pong_main(void){
 		if (timer_isr_countdown <= 0) {
 			// Move and animate every 500 ms
 			timer_isr_countdown = timer_isr_500ms_restart;
-			if (turns < 3){
-				turns ++;
+			if (shuffles < 3){
+				shuffles ++;
 				pong_periodic_play(&my_game);
 			}
 			else {
-				turns = 0;
+				shuffles = 0;
 				Q_data command_packet = {.twist = QUADKNOB_CW};
-				turn_q.put(&turn_q, &command_packet);
-				snake_heading_update(&my_game, &turn_q);
+				shuffle_q.put(&shuffle_q, &command_packet);
+				snake_heading_update(&my_game, &shuffle_q);
 				pong_periodic_play(&my_game);
 			}
 			incremental_show_game(&my_game, true);
