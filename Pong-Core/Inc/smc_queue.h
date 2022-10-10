@@ -3,16 +3,17 @@
  *
  *  Created on: Jul 15, 2022
  *      Author: carrolls
+ *      Edited: seand
  */
 
 #ifndef INC_SMC_QUEUE_STRUCT_H_
 #define INC_SMC_QUEUE_STRUCT_H_
 
 
+#include <pong_enums.h>
 #include <stddef.h> // size_t
 #include <stdint.h>
 #include <stdbool.h>
-#include "snake_enums.h"
 
 
 #define SMC_Q_BUFSIZE 10
@@ -31,15 +32,16 @@
 typedef union {
 		int int_val;
 		float float_val;
-		enum Twist twist;
+		int8_t board[CHECKS_WIDE][CHECKS_WIDE];		//Potential for board to be passed via queues
+		enum move movement;							//Movement enum for paddles
 } Q_data;
 
 typedef struct smc_queue_struct {
 	// ATTRIBUTES
-	size_t cap;
-	size_t burden;
-	size_t tail;
-	size_t head;
+	size_t cap;						//Max no of things in the queue
+	size_t burden;					//How many things are in the queue
+	size_t tail;					//What's at the start of the queue
+	size_t head;					//What's at the end of the queue
 	Q_data buffer[SMC_Q_BUFSIZE];
 
 	// METHODS

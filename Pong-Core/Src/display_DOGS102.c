@@ -33,9 +33,9 @@
 
 // This display driver uses the pins defined in an .ioc file
 // created with STM32CubeMX.
+#include <pong_gameplay.h> // To learn "CHECKS_WIDE"
 #include "main.h"
 #include "display_DOGS_102.h"
-#include "snake_gameplay.h" // To learn "CHECKS_WIDE"
 
 /////////////////////////////////////////////////////////////////////////////
 // Hand-written code that Cube won't help with

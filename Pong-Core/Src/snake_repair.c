@@ -5,7 +5,7 @@
  *      Author: carrolls
  */
 
-#include "snake_gameplay.h"
+#include <pong_gameplay.h>
 #include "display_DOGS_102.h"
 
 
@@ -19,7 +19,7 @@ void snake_game_cleanup(snake_game* s){
 		case SNAKE_COMPASS_E:
 		case SNAKE_COMPASS_W: break;
 		default:
-			s->heading = snake_opposite_direction(s->vertebra[0]);
+			s->heading = pong_opposite_direction(s->vertebra[0]);
 	}
 
 	// Check that the snake doesn't cross itself:
@@ -29,7 +29,7 @@ void snake_game_cleanup(snake_game* s){
 	int8_t y = s->head.y;
 	if ((x > CHECKS_WIDE-1)||(y> CHECKS_WIDE -1)){
 		// Impossible head location: re-spawn game.
-		snake_game_init(s);
+		pong_game_init(s);
 		x = s->head.x;
 		y = s->head.y;
 	}

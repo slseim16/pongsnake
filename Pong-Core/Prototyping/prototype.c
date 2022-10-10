@@ -17,25 +17,25 @@
 //gcc prototype.c -o Prototype.o -Wall
 
 enum move{STAY, UP, DOWN};
-enum side{LEFT, RIGHT};
-enum pong_ball_dirs{NE, SE, NW, SW};
+enum side{LEFT, RIGHT, UP, DOWN};							//UP and DOWN are placements for DEBUG purposes
+enum pong_ball_dirs{N, NE, E, SE, S, SW, W, NW};			//Cardinal Directions (N,E,S,W) are for DEBUG puropses
 
-struct pong_board{
+typedef struct {
     char board[BOARD_SIZE][BOARD_SIZE];
-};
+} pong_board;
 
-struct pong_paddle{
+typedef struct{
     char paddle_object[PADDLE_WIDTH][PADDLE_HEIGHT];
     int loc[2];                 //NOTE MAGIC NUMBER-- This array is of size two merely because the array for the pong board is 2D, and therefore only has two dimensions for locations
-};
+} pong_paddle;
 
-struct pong_sphere{
+typedef struct{
     char ball_object;
     int loc[2];                  //Same NOTE as pong_paddle.loc
     enum pong_ball_dirs dir;
-};
+} pong_sphere;
 
-void pong_board_init(struct pong_board* pb){
+void pong_board_init(pong_board* pb){
     // char filled_board[BOARD_SIZE][BOARD_SIZE];
     char filled_board[BOARD_SIZE][BOARD_SIZE] = {
         {"........"},
@@ -62,7 +62,7 @@ void pong_board_init(struct pong_board* pb){
     }
 }
 
-void pong_board_display(struct pong_board* pb){
+void pong_board_display(pong_board* pb){
     for(int i=0; i<BOARD_SIZE; i++){
         for(int j=0; j<BOARD_SIZE; j++){
             printf("%c  ", pb->board[i][j]);
@@ -71,7 +71,7 @@ void pong_board_display(struct pong_board* pb){
     }
 }
 
-void paddle_init(struct pong_paddle* pd, enum side side){
+void paddle_init(pong_paddle* pd, enum side side){
     char paddle_char = 'X';
 
     //Condition for if the paddle is to be placed on the left side FIXED MAGIC NUMBER WITH ENUM
@@ -92,7 +92,7 @@ void paddle_init(struct pong_paddle* pd, enum side side){
     }
 }
 
-void paddle_movement(struct pong_paddle* pd, struct pong_board* pb, enum move move){
+void paddle_movement(pong_paddle* pd, pong_board* pb, enum move move){
     //Guard clause for checking y movement validity
     if(pd->loc[1] == 0 || pd->loc[1] == 6){
         return;
@@ -109,14 +109,14 @@ void paddle_movement(struct pong_paddle* pd, struct pong_board* pb, enum move mo
     }
 }
 
-void sphere_init(struct pong_sphere* ps){
+void sphere_init(pong_sphere* ps){
     ps->ball_object = 'O';
     ps->loc[0] = 4;
     ps->loc[1] = 4;
     ps->dir = NE;
 }
 
-void sphere_direction_collision(struct pong_sphere* ps, struct pong_board* pb){
+void sphere_direction_collision(pong_sphere* ps, pong_board* pb){
     //Write some stuff in here that will calculate:
     //  Whether the pong ball has hit a paddle or the ceiling
     //  Choose an opposite direction if it has hit a paddle or celing
