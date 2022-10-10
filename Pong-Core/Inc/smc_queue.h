@@ -9,10 +9,10 @@
 #define INC_SMC_QUEUE_STRUCT_H_
 
 
+#include <pong_enums.h>
 #include <stddef.h> // size_t
 #include <stdint.h>
 #include <stdbool.h>
-#include "snake_enums.h"
 
 
 #define SMC_Q_BUFSIZE 10
