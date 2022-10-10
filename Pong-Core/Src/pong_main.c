@@ -210,18 +210,30 @@ void pong_main(void){
 		if (timer_isr_countdown <= 0) {
 			// Move and animate every 500 ms
 			timer_isr_countdown = timer_isr_500ms_restart;
-			if (shuffles < 3){
-				shuffles ++;
-				pong_periodic_play(&my_game);
-			}
-			else {
-				shuffles = 0;
-				Q_data command_packet = {.twist = QUADKNOB_CW};
+//			if (shuffles < 3){
+//				shuffles ++;
+//				pong_periodic_play(&my_game);
+//			}
+//			else {
+//				shuffles = 0;
+//				Q_data command_packet = {.twist = QUADKNOB_CW};
+//				shuffle_q.put(&shuffle_q, &command_packet);
+//				snake_heading_update(&my_game, &shuffle_q);
+//				pong_periodic_play(&my_game);
+//			}
+//			incremental_show_game(&my_game, true);
+
+			//Initialize input command packet states
+			switch(shuffles){
+			case 0:
+				Q_data command_packet = {.movement = UP};
 				shuffle_q.put(&shuffle_q, &command_packet);
-				snake_heading_update(&my_game, &shuffle_q);
+				pong_periodic_play(&my_game);
+			case 1:
+				Q_data command_packet = {.movement = UP};
+				shuffle_q.put(&shuffle_q, &command_packet);
 				pong_periodic_play(&my_game);
 			}
-			incremental_show_game(&my_game, true);
 		}
 #endif
 	}

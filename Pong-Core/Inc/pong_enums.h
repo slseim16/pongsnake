@@ -17,4 +17,5 @@
 enum move{STAY, UP, DOWN};
 enum side{LEFT, RIGHT, UP, DOWN};							//UP and DOWN are placements for DEBUG purposes
 enum pong_ball_dirs{N, NE, E, SE, S, SW, W, NW};			//Cardinal Directions (N,E,S,W) are for DEBUG purposes
+enum what_i_hit{PADDLE, FLOOR, CELING, WALL, NONE};			//Defines some things the pong sphere can hit
 #endif /* INC_SNAKE_TURN_H_ */
