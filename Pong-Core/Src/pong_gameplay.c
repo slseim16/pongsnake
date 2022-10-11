@@ -47,12 +47,43 @@ const XY_PT error_bar[ERROR_DISPLAY_BLOCK_COUNT] = ERROR_DISPLAY_BAD_HEADING;		/
 bool pong_sphere_plot(pong_board *pb){
 	bool ok = true;
 
-	//Guard clauses for Pong Sphere
-	if(pb->pong_sphere)
+	int8_t x = pb->ball.loc.x;
+	int8_t y = pb->ball.loc.y;
 
-	int8_t x = pb->ball->loc.x;
-	int8_t y = pb->ball->loc.y;
-	b[x][y] = pb->ball->ball_object;
+	switch(pb->ball.dir){
+	case N:
+		y--;
+		break;
+	case NE:
+		x++;
+		y--;
+		break;
+	case E:
+		x++;
+		break;
+	case SE:
+		x++;
+		y++;
+		break;
+	case S:
+		y++;
+		break;
+	case SW:
+		x--;
+		y++;
+		break;
+	case W:
+		x--;
+		break;
+	case NW:
+		x--;
+		y--;
+		break;
+	default:		//Error handling, pacify the compiler
+		pacify_compiler();
+	}
+
+	pb->board[x][y] = pb->ball.ball_object;
 
 
 //	// Plot each vertebra.
@@ -88,19 +119,19 @@ bool paddle_plot(pong_board *pb){
 //	}
 
 	//Get the loc for L&R paddles
-	int8_t lx = pb->paddle_L->loc.x;
-	int8_t ly = pb->paddle_L->loc.y;
+	int8_t lx = pb->paddle_L.loc.x;
+	int8_t ly = pb->paddle_L.loc.y;
 
-	int8_t rx = pb->paddle_R->loc.x;
-	int8_t ry = pb->paddle_R->loc.y;
+	int8_t rx = pb->paddle_R.loc.x;
+	int8_t ry = pb->paddle_R.loc.y;
 
 	//Guard clause for paddles NOTE MAGIC NUMBERS
-	if(pb->paddle_L.loc.x <=0 || pb->paddle_L >= 5){
+	if(pb->paddle_L.loc.x <=0 || pb->paddle_L.loc.x >= 5){
 		ok = false;
 		return ok;
 	}
 
-	if(pb->paddle_R.loc.x <=0 || pb->paddle_R >= 5){
+	if(pb->paddle_R.loc.x <=0 || pb->paddle_R.loc.x >= 5){
 		ok = false;
 		return ok;
 	}
@@ -108,20 +139,20 @@ bool paddle_plot(pong_board *pb){
 	//Plots the paddles
 	for(int n=0; n<PADDLE_WIDTH; n++){
 		lx += n;
-		pb->board[lx][ly] = pb->paddle_L->paddle_object;
+		pb->board[lx][ly] = pb->paddle_L.paddle_object;
 	}
 	for(int i=0; i<PADDLE_HEIGHT; i++){
 		ly += i;
-		pb->board[lx][ly] = pb->paddle_L->paddle_object;
+		pb->board[lx][ly] = pb->paddle_L.paddle_object;
 	}
 
 	for(int n=0; n<PADDLE_WIDTH; n++){
 		lx += n;
-		pb->board[lx][ly] = pb->paddle_R->paddle_object;
+		pb->board[lx][ly] = pb->paddle_R.paddle_object;
 	}
 	for(int i=0; i<PADDLE_HEIGHT; i++){
 		ly += i;
-		pb->board[lx][ly] = pb->paddle_R->paddle_object;
+		pb->board[lx][ly] = pb->paddle_R.paddle_object;
 	}
 
 	return ok;
@@ -132,19 +163,19 @@ void paddle_L_shuffle(pong_board* pb, Q_data* q){
 	//State machine for determining how to modify the loc of paddle_L then plotting it
 
 	//Guard clause for paddles NOTE MAGIC NUMBERS
-	if(pb->paddle_L.loc.x <=0 || pb->paddle_L >= 5){
+	if(pb->paddle_L.loc.x <=0 || pb->paddle_L.loc.x >= 5){
 		return;
 	}
 
 	switch(q->movement){
 	case UP:
-		pb->paddle_L->loc.x++;
+		pb->paddle_L.loc.x++;
 		break;
 	case DOWN:
-		pb->paddle_L->loc.x--;
+		pb->paddle_L.loc.x--;
 		break;
 	default:
-		break;
+		pacify_compiler();
 	}
 	paddle_plot(pb);
 }
@@ -153,19 +184,19 @@ void paddle_R_shuffle(pong_board* pb, Q_data* q){
 	//State machine for determining how to modify the loc of paddle_L then plotting it
 
 	//Guard clause for paddles NOTE MAGIC NUMBERS
-	if(pb->paddle_R.loc.x <=0 || pb->paddle_R >= 5){
+	if(pb->paddle_R.loc.x <=0 || pb->paddle_R.loc.x >= 5){
 		return;
 	}
 
 	switch(q->movement){
 	case UP:
-		pb->paddle_R->loc.x++;
+		pb->paddle_R.loc.x++;
 		break;
 	case DOWN:
-		pb->paddle_R->loc.x--;
+		pb->paddle_R.loc.x--;
 		break;
 	default:
-		break;
+		pacify_compiler();
 	}
 	paddle_plot(pb);
 }
@@ -222,13 +253,26 @@ void pong_game_init(pong_board* pb){
 	}
 
 	//Initializes the Paddles
-	pb->paddle_L->paddle_object = 1;
-	pb->paddle_R->paddle_object = 2;
-	pb->paddle_L->loc = paddle_L;
-	pb->paddle_R->loc = paddle_R;
+	for(int i=0; i<PADDLE_HEIGHT; i++){
+		for(int j=0; j<PADDLE_WIDTH; j++){
+			pb->paddle_L.paddle_object[i][j] = 1;
+		}
+	}
+	for(int i=0; i<PADDLE_HEIGHT; i++){
+		for(int j=0; j<PADDLE_WIDTH; j++){
+			pb->paddle_R.paddle_object[i][j] = 2;
+		}
+	}
+	pb->paddle_L.loc = paddle_L;
+	pb->paddle_R.loc = paddle_R;
 
-	pb->ball->ball_object = -1;
 
+	//Initializes the sphere
+	pb->ball.ball_object = -1;
+	pb->ball.loc = sphere;
+
+	paddle_plot(pb);
+	pong_sphere_plot(pb);
 }
 
 
@@ -269,73 +313,73 @@ void snake_heading_update(snake_game* s, Smc_queue* q){
 }
 
 
-void snake_place_fruit(snake_game *s, const int8_t board[CHECKS_WIDE][CHECKS_WIDE]){
-	// MUST NOT CALL snake_board_cleanup to avoid bad recursion.
-	// Tries to place fruit randomly; if unlucky, then switches to a
-	// put-it-in-the-first-empty-cell.
-	const int16_t patience = 100;
-	bool complete = false;
-	// JPL says all loops must terminate - so we will only try 100 times
-	// (called our "patience") for a fun random result. Otherwise, we will
-	// place fruit at the first available cell l-to-r,  top-to-bottom.
-	for (int n = 0; n < patience; n++){
-		uint8_t yy = rand() % CHECKS_WIDE;
-		uint8_t xx = rand() % CHECKS_WIDE;
-		if (board[xx][yy] == 0){
-			complete = true;
-			s->fruit.x = xx;
-			s->fruit.y = yy;
-			break; //-- done the loop!
-		} // end if board cell is open
-	}// end for loop trying 100 random placements
+//void snake_place_fruit(snake_game *s, const int8_t board[CHECKS_WIDE][CHECKS_WIDE]){
+//	// MUST NOT CALL snake_board_cleanup to avoid bad recursion.
+//	// Tries to place fruit randomly; if unlucky, then switches to a
+//	// put-it-in-the-first-empty-cell.
+//	const int16_t patience = 100;
+//	bool complete = false;
+//	// JPL says all loops must terminate - so we will only try 100 times
+//	// (called our "patience") for a fun random result. Otherwise, we will
+//	// place fruit at the first available cell l-to-r,  top-to-bottom.
+//	for (int n = 0; n < patience; n++){
+//		uint8_t yy = rand() % CHECKS_WIDE;
+//		uint8_t xx = rand() % CHECKS_WIDE;
+//		if (board[xx][yy] == 0){
+//			complete = true;
+//			s->fruit.x = xx;
+//			s->fruit.y = yy;
+//			break; //-- done the loop!
+//		} // end if board cell is open
+//	}// end for loop trying 100 random placements
+//
+//	// If 100 random guesses all hit the snake's body, then
+//	// begin an exhaustive search from the top left. We will
+//	// find an open cell if there is one!
+//	if (!complete){
+//		for (int r = 0; r < CHECKS_WIDE; r++){
+//			for (int c = 0; c < CHECKS_WIDE; c++){
+//				if (board[r][c] == 0){
+//					complete = true;
+//					s->fruit.x = r;
+//					s->fruit.y = c;
+//					break; //-- done the loop!
+//				}// end if
+//			} // end for-c
+//		} // end for-r
+//	} // end if back-up plan
+//	display_dark_square(s->fruit.x,s->fruit.y);
+//
+//	return;
+//}
 
-	// If 100 random guesses all hit the snake's body, then
-	// begin an exhaustive search from the top left. We will
-	// find an open cell if there is one!
-	if (!complete){
-		for (int r = 0; r < CHECKS_WIDE; r++){
-			for (int c = 0; c < CHECKS_WIDE; c++){
-				if (board[r][c] == 0){
-					complete = true;
-					s->fruit.x = r;
-					s->fruit.y = c;
-					break; //-- done the loop!
-				}// end if
-			} // end for-c
-		} // end for-r
-	} // end if back-up plan
-	display_dark_square(s->fruit.x,s->fruit.y);
-
-	return;
-}
-
-XY_PT find_next_head(snake_game* s){
-	XY_PT square = s->head;
-	switch(s->heading){
-	    // The heading should always be a real direction
-		case SNAKE_COMPASS_0:
-		case SNAKE_COMPASS_FRUIT_HERE:
-			pong_game_init(s);
-			break;
-		// Quick calculation of the next cell:
-		case SNAKE_COMPASS_N:
-			square.y--;
-			break;
-		case SNAKE_COMPASS_S:
-			square.y++;
-			break;
-		case SNAKE_COMPASS_E:
-			square.x++;
-			break;
-		case SNAKE_COMPASS_W:
-			square.x--;
-			break;
-	}
-	// Wrap like a torus: -1->7, 0->0, 1->1, 7->7, 8->0
-	square.x = (square.x >= 0)?(square.x % CHECKS_WIDE):(CHECKS_WIDE-1);
-	square.y = (square.y >= 0)?(square.y % CHECKS_WIDE):(CHECKS_WIDE-1);
-	return square;
-}
+//XY_PT find_next_head(snake_game* s){
+//	XY_PT square = s->head;
+//	switch(s->heading){
+//	    // The heading should always be a real direction
+//		case SNAKE_COMPASS_0:
+//		case SNAKE_COMPASS_FRUIT_HERE:
+//			pong_game_init(s);
+//			break;
+//		// Quick calculation of the next cell:
+//		case SNAKE_COMPASS_N:
+//			square.y--;
+//			break;
+//		case SNAKE_COMPASS_S:
+//			square.y++;
+//			break;
+//		case SNAKE_COMPASS_E:
+//			square.x++;
+//			break;
+//		case SNAKE_COMPASS_W:
+//			square.x--;
+//			break;
+//	}
+//	// Wrap like a torus: -1->7, 0->0, 1->1, 7->7, 8->0
+//	square.x = (square.x >= 0)?(square.x % CHECKS_WIDE):(CHECKS_WIDE-1);
+//	square.y = (square.y >= 0)?(square.y % CHECKS_WIDE):(CHECKS_WIDE-1);
+//	return square;
+//}
 
 void pong_periodic_play(pong_board* pb){
 //	// Get a fresh plot of the board to check for legal & fruit moves:
@@ -355,11 +399,27 @@ void pong_periodic_play(pong_board* pb){
 		pong_sphere_plot(pb);
 	}
 
-	//TODO PONG RULES GO HERE
-	//Such as
-	//	Checking collision between paddle and ball
-	//	Calling function to determine direction
-	//	Checking collision between paddle and floor/ceiling
+
+	//Checking sphere collision (is the sphere moving into a paddle, vertical wall, or ceiling/floor?)
+	//NOTE light use of MAGIC NUMBER 7-- The far coordinate
+	if(pb->ball.loc.y >= pb->paddle_L.loc.y || pb->ball.loc.y <= (pb->paddle_L.loc.y + PADDLE_HEIGHT)){
+		pb->ball.dir = pong_opposite_direction(pb->ball.dir);
+	}
+	if(pb->ball.loc.y >= pb->paddle_R.loc.y || pb->ball.loc.y <= (pb->paddle_R.loc.y + PADDLE_HEIGHT)){
+		pb->ball.dir = pong_opposite_direction(pb->ball.dir);
+	}
+	if(pb->ball.loc.y <= 0){
+		pb->ball.dir = pong_opposite_direction(pb->ball.dir);
+	}
+	if(pb->ball.loc.y >= 7){
+		pb->ball.dir = pong_opposite_direction(pb->ball.dir);
+	}
+	if(pb->ball.loc.x <= 0){
+		pb->ball.dir = pong_opposite_direction(pb->ball.dir);
+	}
+	if(pb->ball.loc.x >= 7){
+		pb->ball.dir = pong_opposite_direction(pb->ball.dir);
+	}
 
 
 //	XY_PT next_head = find_next_head(s);

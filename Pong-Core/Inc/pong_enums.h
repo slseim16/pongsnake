@@ -5,7 +5,7 @@
  *      Author: carrolls
  */
 
-#ifndef INC_SNAKE_TURN_H_
+#ifndef INC_PONG_ENUMS_H_
 #define INC_PONG_ENUMS_H_
 
 //enum snake_direction {CRAWL_X_PLUS, CRAWL_X_MINUS, CRAWL_Y_PLUS, CRAWL_Y_MINUS};        //Remake for pong
@@ -15,7 +15,7 @@
 //enum snake_compass_dir {SNAKE_COMPASS_N, SNAKE_COMPASS_S, SNAKE_COMPASS_E, SNAKE_COMPASS_W, SNAKE_COMPASS_0, SNAKE_COMPASS_FRUIT_HERE};     //Not necessary and no need to remake?
 
 enum move{STAY, UP, DOWN};
-enum side{LEFT, RIGHT, UP, DOWN};							//UP and DOWN are placements for DEBUG purposes
+enum side{LEFT, RIGHT};							//UP and DOWN are placements for DEBUG purposes
 enum pong_ball_dirs{N, NE, E, SE, S, SW, W, NW};			//Cardinal Directions (N,E,S,W) are for DEBUG purposes
 enum what_i_hit{PADDLE, FLOOR, CELING, WALL, NONE};			//Defines some things the pong sphere can hit
-#endif /* INC_SNAKE_TURN_H_ */
+#endif /* INC_PONG_ENUMS_H_ */
