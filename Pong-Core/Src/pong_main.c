@@ -89,7 +89,7 @@
 #include <show_game.h>
 #include "main.h"
 #include "display_DOGS_102.h"
-#include "quadknob.h"
+//#include "quadknob.h"
 #include "smc_queue.h"
 
 ///////////////////////////
@@ -132,9 +132,9 @@ void pong_main(void){
 	smc_queue_init(&shuffle_q);
 
 	// Input object
-	QuadKnob user_knob_1;
+	//QuadKnob user_knob_1;
 	volatile uint16_t ram_dummy_3 = MEMORY_BARRIER_3;
-	quadknob_init(&user_knob_1);
+	//quadknob_init(&user_knob_1);
 
 	// Output object
 	// Block all interrupts while initializing - initial protocol timing is critical.

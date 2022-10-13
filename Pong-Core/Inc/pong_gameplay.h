@@ -12,7 +12,6 @@
 #include <pong_enums.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include "quadknob.h"
 #include "smc_queue.h"
 #include <pong_main.h> // Get checks and display width
 
@@ -51,10 +50,10 @@ enum pong_ball_dirs pong_opposite_direction(enum pong_ball_dirs d);
 void pong_game_init(pong_board* pb);
 void paddle_L_shuffle(pong_board* pb, Q_data* q);
 void paddle_R_shuffle(pong_board* pb, Q_data* q);
-void snake_game_cleanup(snake_game* s);
-void snake_heading_update(snake_game* snake, Smc_queue* q);
+//void snake_game_cleanup(snake_game* s);
+//void snake_heading_update(snake_game* snake, Smc_queue* q);
 void pong_periodic_play(pong_board* pb);
-void snake_place_fruit(snake_game * s, const int8_t b[CHECKS_WIDE][CHECKS_WIDE]);
+//void snake_place_fruit(snake_game * s, const int8_t b[CHECKS_WIDE][CHECKS_WIDE]);
 bool pong_sphere_plot(pong_board *pb);
 bool paddle_plot(pong_board *pb);
 
