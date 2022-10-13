@@ -201,6 +201,8 @@ void pong_main(void){
 		}
 #endif
 #ifdef TEST_WITHOUT_INPUT
+		// This block of code tests if the game works by spoofing paddle shuffle inputs.
+		// L paddle moves up, down, then up, and loops back. R paddle stays put.
 		static int shuffles = 0;
 		// Normally "check for user input every 1 ms & show" - here just update display
 		if (prior_timer_countdown != timer_isr_countdown ){
@@ -224,14 +226,26 @@ void pong_main(void){
 //			incremental_show_game(&my_game, true);
 
 			//Initialize input command packet states
+			Q_data command_packet;
 			switch(shuffles){
 			case 0:
-				Q_data command_packet = {.movement = UP};
+				command_packet.movement = UP;
+				shuffles++;
 				shuffle_q.put(&shuffle_q, &command_packet);
+				paddle_L_shuffle(&my_game, &command_packet);
 				pong_periodic_play(&my_game);
 			case 1:
-				Q_data command_packet = {.movement = UP};
+				command_packet.movement = DOWN;
+				shuffles++;
 				shuffle_q.put(&shuffle_q, &command_packet);
+				pong_periodic_play(&my_game);
+			case 2:
+				command_packet.movement = UP;
+				shuffles = 0;
+				shuffle_q.put(&shuffle_q, &command_packet);
+				pong_periodic_play(&my_game);
+			default:		//Error handler, throws it back to state 0
+				shuffles = 0;
 				pong_periodic_play(&my_game);
 			}
 		}
