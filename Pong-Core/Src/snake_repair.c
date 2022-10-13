@@ -8,7 +8,7 @@
 #include <pong_gameplay.h>
 #include "display_DOGS_102.h"
 
-
+/*
 void snake_game_cleanup(snake_game* s){
 	display_init();
 
@@ -69,3 +69,4 @@ void snake_game_cleanup(snake_game* s){
 	}
 	display_dark_square(s->fruit.x, s->fruit.y);
 }
+*/

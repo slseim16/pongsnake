@@ -15,7 +15,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include "snake_repair.h"
-#include "quadknob.h"
 #include "display_DOGS_102.h"
 
 #define ERROR_DISPLAY_BAD_HEADING {{1,0},{1,1},{1,2}, {1,4},{1,5},{1,6}}
@@ -80,7 +79,8 @@ bool pong_sphere_plot(pong_board *pb){
 		y--;
 		break;
 	default:		//Error handling, pacify the compiler
-		pacify_compiler();
+		//pacify_compiler();
+		break;
 	}
 
 	pb->board[x][y] = pb->ball.ball_object;
@@ -139,20 +139,20 @@ bool paddle_plot(pong_board *pb){
 	//Plots the paddles
 	for(int n=0; n<PADDLE_WIDTH; n++){
 		lx += n;
-		pb->board[lx][ly] = pb->paddle_L.paddle_object;
+		pb->board[lx][ly] = pb->paddle_L.paddle_object[0][0];
 	}
 	for(int i=0; i<PADDLE_HEIGHT; i++){
 		ly += i;
-		pb->board[lx][ly] = pb->paddle_L.paddle_object;
+		pb->board[lx][ly] = pb->paddle_L.paddle_object[0][0];
 	}
 
 	for(int n=0; n<PADDLE_WIDTH; n++){
-		lx += n;
-		pb->board[lx][ly] = pb->paddle_R.paddle_object;
+		rx += n;
+		pb->board[rx][ry] = pb->paddle_R.paddle_object[0][0];
 	}
 	for(int i=0; i<PADDLE_HEIGHT; i++){
-		ly += i;
-		pb->board[lx][ly] = pb->paddle_R.paddle_object;
+		ry += i;
+		pb->board[rx][ry] = pb->paddle_R.paddle_object[0][0];
 	}
 
 	return ok;
@@ -175,7 +175,7 @@ void paddle_L_shuffle(pong_board* pb, Q_data* q){
 		pb->paddle_L.loc.x--;
 		break;
 	default:
-		pacify_compiler();
+		break;
 	}
 	paddle_plot(pb);
 }
@@ -196,7 +196,7 @@ void paddle_R_shuffle(pong_board* pb, Q_data* q){
 		pb->paddle_R.loc.x--;
 		break;
 	default:
-		pacify_compiler();
+		break;
 	}
 	paddle_plot(pb);
 }
@@ -275,14 +275,15 @@ void pong_game_init(pong_board* pb){
 	pong_sphere_plot(pb);
 }
 
-
+/*
 void pacify_compiler(){
 
 }
-
+*/
 // snake_heading_update(game-pointer, queue-pointer) will adjust the
 // (.heading) field of a snake in response to a message from the user
 // as conveyed on the queue.
+/*
 void snake_heading_update(snake_game* s, Smc_queue* q){
 	Q_data msg;
 	bool data_available;
@@ -311,7 +312,7 @@ void snake_heading_update(snake_game* s, Smc_queue* q){
     	}
     }
 }
-
+*/
 
 //void snake_place_fruit(snake_game *s, const int8_t board[CHECKS_WIDE][CHECKS_WIDE]){
 //	// MUST NOT CALL snake_board_cleanup to avoid bad recursion.
