@@ -174,6 +174,11 @@ bool paddle_plot(pong_board *pb){
 		}
 	}
 
+	pb->paddle_L.loc.x = lx;
+	pb->paddle_L.loc.y = ly;
+	pb->paddle_R.loc.x = rx;
+	pb->paddle_R.loc.y = ry;
+
 	return ok;
 }
 

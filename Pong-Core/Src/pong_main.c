@@ -122,7 +122,7 @@ void pong_main(void){
 
 	// INITIALIZE THE GAME
 	// Construct the model "game" object:
-	pong_board my_game;
+	static pong_board my_game;
 	volatile uint16_t ram_dummy_1 = MEMORY_BARRIER_1;
 	pong_game_init(&my_game);
 
