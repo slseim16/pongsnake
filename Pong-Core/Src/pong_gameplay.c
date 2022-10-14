@@ -126,33 +126,50 @@ bool paddle_plot(pong_board *pb){
 	int8_t ry = pb->paddle_R.loc.y;
 
 	//Guard clause for paddles NOTE MAGIC NUMBERS
-	if(pb->paddle_L.loc.x <=0 || pb->paddle_L.loc.x >= 5){
-		ok = false;
+	if(pb->paddle_L.loc.x <0 || pb->paddle_L.loc.x > 5){
+//		ok = false;
+//		return ok;
 		return ok;
 	}
 
-	if(pb->paddle_R.loc.x <=0 || pb->paddle_R.loc.x >= 5){
-		ok = false;
+	if(pb->paddle_R.loc.x <0 || pb->paddle_R.loc.x > 5){
+//		ok = false;
+//		return ok;
 		return ok;
 	}
 
 	//Plots the paddles
-	for(int n=0; n<PADDLE_WIDTH; n++){
-		lx += n;
-		pb->board[lx][ly] = pb->paddle_L.paddle_object[0][0];
+	for(int i=0; i<PADDLE_WIDTH; i++){
+		lx += i;
+		for(int j=0; j<PADDLE_WIDTH; j++){
+			ly += j;
+			pb->board[lx][ly] = pb->paddle_L.paddle_object[i][j];
+		}
 	}
-	for(int i=0; i<PADDLE_HEIGHT; i++){
-		ly += i;
-		pb->board[lx][ly] = pb->paddle_L.paddle_object[0][0];
-	}
+//	for(int n=0; n<PADDLE_WIDTH; n++){
+//		lx += n;
+//		pb->board[lx][ly] = pb->paddle_L.paddle_object[0][0];
+//	}
+//	for(int i=0; i<PADDLE_HEIGHT; i++){
+//		ly += i;
+//		pb->board[lx][ly] = pb->paddle_L.paddle_object[0][0];
+//	}
 
-	for(int n=0; n<PADDLE_WIDTH; n++){
-		rx += n;
-		pb->board[rx][ry] = pb->paddle_R.paddle_object[0][0];
-	}
-	for(int i=0; i<PADDLE_HEIGHT; i++){
-		ry += i;
-		pb->board[rx][ry] = pb->paddle_R.paddle_object[0][0];
+//	for(int n=0; n<PADDLE_WIDTH; n++){
+//		rx += n;
+//		pb->board[rx][ry] = pb->paddle_R.paddle_object[0][0];
+//	}
+//	for(int i=0; i<PADDLE_HEIGHT; i++){
+//		ry += i;
+//		pb->board[rx][ry] = pb->paddle_R.paddle_object[0][0];
+//	}
+
+	for(int i=0; i<PADDLE_WIDTH; i++){
+		rx += i;
+		for(int j=0; j<PADDLE_WIDTH; j++){
+			ry += j;
+			pb->board[rx][ry] = pb->paddle_R.paddle_object[i][j];
+		}
 	}
 
 	return ok;
@@ -163,7 +180,7 @@ void paddle_L_shuffle(pong_board* pb, Q_data* q){
 	//State machine for determining how to modify the loc of paddle_L then plotting it
 
 	//Guard clause for paddles NOTE MAGIC NUMBERS
-	if(pb->paddle_L.loc.x <=0 || pb->paddle_L.loc.x >= 5){
+	if(pb->paddle_L.loc.x <0 || pb->paddle_L.loc.x > 5){
 		return;
 	}
 
@@ -184,7 +201,7 @@ void paddle_R_shuffle(pong_board* pb, Q_data* q){
 	//State machine for determining how to modify the loc of paddle_L then plotting it
 
 	//Guard clause for paddles NOTE MAGIC NUMBERS
-	if(pb->paddle_R.loc.x <=0 || pb->paddle_R.loc.x >= 5){
+	if(pb->paddle_R.loc.x <0 || pb->paddle_R.loc.x > 5){
 		return;
 	}
 
