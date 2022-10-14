@@ -29,7 +29,7 @@ typedef struct {int16_t x; int16_t y;} XY_PT;
 //} snake_game;
 
 typedef struct{
-	int8_t paddle_object[PADDLE_WIDTH][PADDLE_HEIGHT];
+	int8_t paddle_object;
     XY_PT loc;
 } pong_paddle;
 
