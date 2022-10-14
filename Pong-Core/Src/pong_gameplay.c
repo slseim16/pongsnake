@@ -26,13 +26,13 @@
 enum pong_ball_dirs pong_opposite_direction(enum pong_ball_dirs d){
 	switch(d){
 	case N: return S; break;
-	case NE: return SW; break;
+	case NE: return SE; break;
 	case E: return W; break;
-	case SE: return NW; break;
+	case SE: return SW; break;
 	case S: return N; break;
-	case SW: return NE; break;
+	case SW: return NW; break;
 	case W: return E; break;
-	case NW: return SE; break;
+	case NW: return NE; break;
 	default: return d;
 	}
 }
@@ -83,6 +83,8 @@ bool pong_sphere_plot(pong_board *pb){
 		break;
 	}
 
+	pb->ball.loc.x = x;
+	pb->ball.loc.y = y;
 	pb->board[x][y] = pb->ball.ball_object;
 
 
@@ -143,7 +145,7 @@ bool paddle_plot(pong_board *pb){
 		lx += i;
 		for(int j=0; j<PADDLE_WIDTH; j++){
 			ly += j;
-			pb->board[lx][ly] = pb->paddle_L.paddle_object[i][j];
+			pb->board[lx][ly] = pb->paddle_L.paddle_object;
 		}
 	}
 //	for(int n=0; n<PADDLE_WIDTH; n++){
@@ -168,7 +170,7 @@ bool paddle_plot(pong_board *pb){
 		rx += i;
 		for(int j=0; j<PADDLE_WIDTH; j++){
 			ry += j;
-			pb->board[rx][ry] = pb->paddle_R.paddle_object[i][j];
+			pb->board[rx][ry] = pb->paddle_R.paddle_object;
 		}
 	}
 
@@ -241,8 +243,8 @@ void pong_game_init(pong_board* pb){
 	// The sphere has y bounds of 0<= loc.x <= 7 && 0<= loc.y <=7 assuming it runs into no paddles.
 	// TODO code logic for sphere hitting columns 0 and 7 (x=0 and x=7)
 
-	const XY_PT paddle_L = {0,2};
-	const XY_PT paddle_R = {7,3};
+	const XY_PT paddle_L = {1,2};
+	const XY_PT paddle_R = {6,3};
 	const XY_PT sphere = {3,3};
 
 //	const XY_PT initial_head = {3,3};
@@ -270,23 +272,26 @@ void pong_game_init(pong_board* pb){
 	}
 
 	//Initializes the Paddles
-	for(int i=0; i<PADDLE_HEIGHT; i++){
-		for(int j=0; j<PADDLE_WIDTH; j++){
-			pb->paddle_L.paddle_object[i][j] = 1;
-		}
-	}
-	for(int i=0; i<PADDLE_HEIGHT; i++){
-		for(int j=0; j<PADDLE_WIDTH; j++){
-			pb->paddle_R.paddle_object[i][j] = 2;
-		}
-	}
+//	for(int i=0; i<PADDLE_WIDTH; i++){
+//		for(int j=0; j<PADDLE_HEIGHT; j++){
+//			pb->paddle_L.paddle_object[i][j] = 1;
+//		}
+//	}
+//	for(int i=0; i<PADDLE_WIDTH; i++){
+//		for(int j=0; j<PADDLE_HEIGHT; j++){
+//			pb->paddle_R.paddle_object[i][j] = 2;
+//		}
+//	}
 	pb->paddle_L.loc = paddle_L;
+	pb->paddle_L.paddle_object = 1;
 	pb->paddle_R.loc = paddle_R;
+	pb->paddle_R.paddle_object = 2;
 
 
 	//Initializes the sphere
 	pb->ball.ball_object = -1;
 	pb->ball.loc = sphere;
+	pb->ball.dir = NE;
 
 	paddle_plot(pb);
 	pong_sphere_plot(pb);
@@ -426,16 +431,16 @@ void pong_periodic_play(pong_board* pb){
 	if(pb->ball.loc.y >= pb->paddle_R.loc.y || pb->ball.loc.y <= (pb->paddle_R.loc.y + PADDLE_HEIGHT)){
 		pb->ball.dir = pong_opposite_direction(pb->ball.dir);
 	}
-	if(pb->ball.loc.y <= 0){
+	if(pb->ball.loc.y == 0){
 		pb->ball.dir = pong_opposite_direction(pb->ball.dir);
 	}
-	if(pb->ball.loc.y >= 7){
+	if(pb->ball.loc.y == 7){
 		pb->ball.dir = pong_opposite_direction(pb->ball.dir);
 	}
-	if(pb->ball.loc.x <= 0){
+	if(pb->ball.loc.x == 0){
 		pb->ball.dir = pong_opposite_direction(pb->ball.dir);
 	}
-	if(pb->ball.loc.x >= 7){
+	if(pb->ball.loc.x == 7){
 		pb->ball.dir = pong_opposite_direction(pb->ball.dir);
 	}
 
