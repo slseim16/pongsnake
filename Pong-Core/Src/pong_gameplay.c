@@ -26,13 +26,13 @@
 enum pong_ball_dirs pong_opposite_direction(enum pong_ball_dirs d){
 	switch(d){
 	case N: return S; break;
-	case NE: return SW; break;
+	case NE: return SE; break;
 	case E: return W; break;
-	case SE: return NW; break;
+	case SE: return SW; break;
 	case S: return N; break;
-	case SW: return NE; break;
+	case SW: return NW; break;
 	case W: return E; break;
-	case NW: return SE; break;
+	case NW: return NE; break;
 	default: return d;
 	}
 }
