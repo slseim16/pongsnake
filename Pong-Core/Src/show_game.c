@@ -15,13 +15,6 @@ void incremental_show_game(pong_board* pb, bool board_updated){		// Potentially 
 //	static int8_t b[CHECKS_WIDE][CHECKS_WIDE] = {0};
 
 	if (board_updated){
-//		// clear canvas
-//		for (int r = 0; r < CHECKS_WIDE; r++){
-//			for (int c = 0; c < CHECKS_WIDE; c++){
-//				b[r][c] = 0;
-//			}
-//		}
-
 		//Clear the board
 		for(int i=0; i<CHECKS_WIDE; i++){
 			for(int j=0; j<CHECKS_WIDE; j++){
