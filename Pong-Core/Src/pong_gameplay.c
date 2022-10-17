@@ -24,15 +24,28 @@
 // It is used to change direction of pong ball when it collides with a paddle
 // or the ceiling/floor.
 enum pong_ball_dirs pong_opposite_direction(enum pong_ball_dirs d){
+// This encourages the ball to spin in a clockwise direction on the board
+//	switch(d){
+//	case N: return S; break;
+//	case NE: return SE; break;
+//	case E: return W; break;
+//	case SE: return SW; break;
+//	case S: return N; break;
+//	case SW: return NW; break;
+//	case W: return E; break;
+//	case NW: return NE; break;
+//	default: return d;
+//	}
+// This knocks the ball back in the same direction it came
 	switch(d){
 	case N: return S; break;
-	case NE: return SE; break;
+	case NE: return SW; break;
 	case E: return W; break;
-	case SE: return SW; break;
+	case SE: return NW; break;
 	case S: return N; break;
-	case SW: return NW; break;
+	case SW: return NE; break;
 	case W: return E; break;
-	case NW: return NE; break;
+	case NW: return SE; break;
 	default: return d;
 	}
 }
@@ -48,6 +61,12 @@ bool pong_sphere_plot(pong_board *pb){
 
 	int8_t x = pb->ball.loc.x;
 	int8_t y = pb->ball.loc.y;
+
+	//Guard clause for illegal bounds
+	if(x <0 || y<0 || x>7 || y>7){
+		ok = false;
+		return ok;
+	}
 
 	switch(pb->ball.dir){
 	case N:
@@ -128,49 +147,28 @@ bool paddle_plot(pong_board *pb){
 	int8_t ry = pb->paddle_R.loc.y;
 
 	//Guard clause for paddles NOTE MAGIC NUMBERS
-	if(pb->paddle_L.loc.x <0 || pb->paddle_L.loc.x > 5){
-//		ok = false;
+	if(pb->paddle_L.loc.y <0 || pb->paddle_L.loc.y > 5){
+		ok = false;
 //		return ok;
 		return ok;
 	}
 
-	if(pb->paddle_R.loc.x <0 || pb->paddle_R.loc.x > 5){
-//		ok = false;
+	if(pb->paddle_R.loc.y <0 || pb->paddle_R.loc.y > 5){
+		ok = false;
 //		return ok;
 		return ok;
 	}
 
 	//Plots the paddles
 	for(int i=0; i<PADDLE_WIDTH; i++){
-		lx += i;
-		for(int j=0; j<PADDLE_WIDTH; j++){
-			ly += j;
-			pb->board[lx][ly] = pb->paddle_L.paddle_object;
+		for(int j=0; j<PADDLE_HEIGHT; j++){
+			pb->board[lx + i][ly + j] = pb->paddle_L.paddle_object;
 		}
 	}
-//	for(int n=0; n<PADDLE_WIDTH; n++){
-//		lx += n;
-//		pb->board[lx][ly] = pb->paddle_L.paddle_object[0][0];
-//	}
-//	for(int i=0; i<PADDLE_HEIGHT; i++){
-//		ly += i;
-//		pb->board[lx][ly] = pb->paddle_L.paddle_object[0][0];
-//	}
-
-//	for(int n=0; n<PADDLE_WIDTH; n++){
-//		rx += n;
-//		pb->board[rx][ry] = pb->paddle_R.paddle_object[0][0];
-//	}
-//	for(int i=0; i<PADDLE_HEIGHT; i++){
-//		ry += i;
-//		pb->board[rx][ry] = pb->paddle_R.paddle_object[0][0];
-//	}
 
 	for(int i=0; i<PADDLE_WIDTH; i++){
-		rx += i;
-		for(int j=0; j<PADDLE_WIDTH; j++){
-			ry += j;
-			pb->board[rx][ry] = pb->paddle_R.paddle_object;
+		for(int j=0; j<PADDLE_HEIGHT; j++){
+			pb->board[rx + i][ry + j] = pb->paddle_R.paddle_object;
 		}
 	}
 
@@ -187,16 +185,16 @@ void paddle_L_shuffle(pong_board* pb, Q_data* q){
 	//State machine for determining how to modify the loc of paddle_L then plotting it
 
 	//Guard clause for paddles NOTE MAGIC NUMBERS
-	if(pb->paddle_L.loc.x <0 || pb->paddle_L.loc.x > 5){
+	if(pb->paddle_L.loc.y <0 || pb->paddle_L.loc.y > 5){
 		return;
 	}
 
 	switch(q->movement){
 	case UP:
-		pb->paddle_L.loc.x++;
+		pb->paddle_L.loc.y++;
 		break;
 	case DOWN:
-		pb->paddle_L.loc.x--;
+		pb->paddle_L.loc.y--;
 		break;
 	default:
 		break;
@@ -239,6 +237,9 @@ void pong_game_init(pong_board* pb){
 	// 0 0 0 0 0 0 0 2 5
 	// 0 0 0 0 0 0 0 0 6
 	// 0 0 0 0 0 0 0 0 7
+	//
+	// NOTE! ARRAYS IN C DON'T BEHAVE LIKE THIS!!
+	// To plot the top most 1, it must be placed in b[2][0]
 	//
 	// The 1's and 2's represent where the PADDLES should draw and the i(-1) where the sphere should draw
 	// Each paddle object has a location enum of XY_PT as well as the sphere
@@ -413,11 +414,11 @@ void pong_periodic_play(pong_board* pb){
 //	// Get a fresh plot of the board to check for legal & fruit moves:
 //	static int8_t board[CHECKS_WIDE][CHECKS_WIDE];
 //	// Always clear the board and redraw it.
-//	for (int x = 0; x < CHECKS_WIDE; x++){
-//		for (int y = 0; y < CHECKS_WIDE; y++){
-//			board[x][y] = 0;
-//		}
-//	}
+	for (int x = 0; x < CHECKS_WIDE; x++){
+		for (int y = 0; y < CHECKS_WIDE; y++){
+			pb->board[x][y] = 0;
+		}
+	}
 	bool ok;
 	ok = pong_sphere_plot(pb) && paddle_plot(pb); // Will happen l-to-r. NOTE as-is it will always be true
 	if (!ok) {
@@ -429,7 +430,7 @@ void pong_periodic_play(pong_board* pb){
 
 
 	//Checking sphere collision (is the sphere moving into a paddle, vertical wall, or ceiling/floor?)
-	//NOTE light use of MAGIC NUMBER 7-- The far coordinate
+	//NOTE use of MAGIC NUMBERS 0 and 7-- The far coordinates
 	if(pb->ball.loc.y >= pb->paddle_L.loc.y || pb->ball.loc.y <= (pb->paddle_L.loc.y + PADDLE_HEIGHT)){
 		pb->ball.dir = pong_opposite_direction(pb->ball.dir);
 	}
