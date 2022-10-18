@@ -25,29 +25,29 @@
 // or the ceiling/floor.
 enum pong_ball_dirs pong_opposite_direction(enum pong_ball_dirs d){
 // This encourages the ball to spin in a clockwise direction on the board
-//	switch(d){
-//	case N: return S; break;
-//	case NE: return SE; break;
-//	case E: return W; break;
-//	case SE: return SW; break;
-//	case S: return N; break;
-//	case SW: return NW; break;
-//	case W: return E; break;
-//	case NW: return NE; break;
-//	default: return d;
-//	}
-// This knocks the ball back in the same direction it came
 	switch(d){
 	case N: return S; break;
-	case NE: return SW; break;
+	case NE: return NW; break;
 	case E: return W; break;
-	case SE: return NW; break;
+	case SE: return NE; break;
 	case S: return N; break;
-	case SW: return NE; break;
+	case SW: return SE; break;
 	case W: return E; break;
-	case NW: return SE; break;
+	case NW: return SW; break;
 	default: return d;
 	}
+// This knocks the ball back in the same direction it came
+//	switch(d){
+//	case N: return S; break;
+//	case NE: return SW; break;
+//	case E: return W; break;
+//	case SE: return NW; break;
+//	case S: return N; break;
+//	case SW: return NE; break;
+//	case W: return E; break;
+//	case NW: return SE; break;
+//	default: return d;
+//	}
 }
 
 
@@ -148,13 +148,13 @@ bool paddle_plot(pong_board *pb){
 
 	//Guard clause for paddles NOTE MAGIC NUMBERS
 	if(pb->paddle_L.loc.y <0 || pb->paddle_L.loc.y > 5){
-		ok = false;
+//		ok = false;
 //		return ok;
 		return ok;
 	}
 
 	if(pb->paddle_R.loc.y <0 || pb->paddle_R.loc.y > 5){
-		ok = false;
+//		ok = false;
 //		return ok;
 		return ok;
 	}
@@ -181,36 +181,48 @@ bool paddle_plot(pong_board *pb){
 }
 
 
-void paddle_L_shuffle(pong_board* pb, Q_data* q){
+void paddle_L_shuffle(pong_board* pb, Smc_queue* q){
 	//State machine for determining how to modify the loc of paddle_L then plotting it
+
+	//Checks if there is data on the queue
+	Q_data msg;
+	bool data_available;
+	data_available = q->get(q, &msg);
+    if (!data_available) return;
 
 	//Guard clause for paddles NOTE MAGIC NUMBERS
 	if(pb->paddle_L.loc.y <0 || pb->paddle_L.loc.y > 5){
 		return;
 	}
 
-	switch(q->movement){
+	switch(msg.movement){
 	case UP:
-		pb->paddle_L.loc.y++;
+		pb->paddle_L.loc.y--;
 		break;
 	case DOWN:
-		pb->paddle_L.loc.y--;
+		pb->paddle_L.loc.y++;
 		break;
 	default:
 		break;
 	}
-	paddle_plot(pb);
+//	paddle_plot(pb);
 }
 
-void paddle_R_shuffle(pong_board* pb, Q_data* q){
+void paddle_R_shuffle(pong_board* pb, Smc_queue* q){
 	//State machine for determining how to modify the loc of paddle_L then plotting it
+
+	//Checks if there is data on the queue
+	Q_data msg;
+	bool data_available;
+	data_available = q->get(q, &msg);
+    if (!data_available) return;
 
 	//Guard clause for paddles NOTE MAGIC NUMBERS
 	if(pb->paddle_R.loc.x <0 || pb->paddle_R.loc.x > 5){
 		return;
 	}
 
-	switch(q->movement){
+	switch(msg.movement){
 	case UP:
 		pb->paddle_R.loc.x++;
 		break;
@@ -220,7 +232,7 @@ void paddle_R_shuffle(pong_board* pb, Q_data* q){
 	default:
 		break;
 	}
-	paddle_plot(pb);
+//	paddle_plot(pb);
 }
 
 // snake_board_init (obvious - sets head, tail, vertebra directions & length, first fruit)
@@ -249,8 +261,8 @@ void pong_game_init(pong_board* pb){
 	// The sphere has y bounds of 0<= loc.x <= 7 && 0<= loc.y <=7 assuming it runs into no paddles.
 	// TODO code logic for sphere hitting columns 0 and 7 (x=0 and x=7)
 
-	const XY_PT paddle_L = {1,2};
-	const XY_PT paddle_R = {6,3};
+	const XY_PT paddle_L = {0,2};
+	const XY_PT paddle_R = {7,3};
 	const XY_PT sphere = {3,3};
 
 //	const XY_PT initial_head = {3,3};
@@ -297,7 +309,7 @@ void pong_game_init(pong_board* pb){
 	//Initializes the sphere
 	pb->ball.ball_object = -1;
 	pb->ball.loc = sphere;
-	pb->ball.dir = NE;
+	pb->ball.dir = SW;
 
 	paddle_plot(pb);
 	pong_sphere_plot(pb);
@@ -431,25 +443,34 @@ void pong_periodic_play(pong_board* pb){
 
 	//Checking sphere collision (is the sphere moving into a paddle, vertical wall, or ceiling/floor?)
 	//NOTE use of MAGIC NUMBERS 0 and 7-- The far coordinates
-	if(pb->ball.loc.y >= pb->paddle_L.loc.y || pb->ball.loc.y <= (pb->paddle_L.loc.y + PADDLE_HEIGHT)){
-		pb->ball.dir = pong_opposite_direction(pb->ball.dir);
-	}
-	if(pb->ball.loc.y >= pb->paddle_R.loc.y || pb->ball.loc.y <= (pb->paddle_R.loc.y + PADDLE_HEIGHT)){
-		pb->ball.dir = pong_opposite_direction(pb->ball.dir);
-	}
-	if(pb->ball.loc.y == 0){
-		pb->ball.dir = pong_opposite_direction(pb->ball.dir);
-	}
-	if(pb->ball.loc.y == 7){
-		pb->ball.dir = pong_opposite_direction(pb->ball.dir);
-	}
-	if(pb->ball.loc.x == 0){
-		pb->ball.dir = pong_opposite_direction(pb->ball.dir);
-	}
-	if(pb->ball.loc.x == 7){
+	if((pb->ball.loc.x == (pb->paddle_L.loc.x + 1)) && (pb->ball.loc.y >= pb->paddle_L.loc.y && pb->ball.loc.y <= (pb->paddle_L.loc.y + PADDLE_HEIGHT - 1))){
 		pb->ball.dir = pong_opposite_direction(pb->ball.dir);
 	}
 
+	if((pb->ball.loc.x == (pb->paddle_R.loc.x - 1)) && (pb->ball.loc.y >= pb->paddle_R.loc.y && pb->ball.loc.y <= (pb->paddle_R.loc.y + PADDLE_HEIGHT - 1))){
+		pb->ball.dir = pong_opposite_direction(pb->ball.dir);
+	}
+
+	if(pb->ball.loc.y == 0){
+		pb->ball.dir = pong_opposite_direction(pb->ball.dir);
+//		display_checkerboard();
+	}
+	if(pb->ball.loc.y == 7){
+		pb->ball.dir = pong_opposite_direction(pb->ball.dir);
+//		display_checkerboard();
+	}
+
+	//NOTE THESE CONDITIONS END THE GAME, GAME MUST BE RESET
+	if(pb->ball.loc.x == 0){
+//		pb->ball.dir = pong_opposite_direction(pb->ball.dir);
+		display_checkerboard();
+		while(1);
+	}
+	if(pb->ball.loc.x == 7){
+//		pb->ball.dir = pong_opposite_direction(pb->ball.dir);
+		display_checkerboard();
+		while(1);
+	}
 
 //	XY_PT next_head = find_next_head(s);
 
