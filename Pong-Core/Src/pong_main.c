@@ -93,7 +93,7 @@
 #include "smc_queue.h"
 
 ///////////////////////////
-// Test -without input, the expected output = snake goes straight ahead every 1/2 second.
+// Test -without input, the expected output = ball goes around CW on the board until it hits a wall that's not blocked by a paddle
 // Without_Input - Works!
 #define TEST_WITHOUT_INPUT
 
@@ -175,23 +175,27 @@ void pong_main(void){
 			// update "knob" object (which debounces each input pin and
 			// then calculates user command).
 
-			bool user_knob_1_pin_A = (GPIO_PIN_SET == HAL_GPIO_ReadPin(QuadKnobA_GPIO_Port, QuadKnobA_Pin));
-			bool user_knob_1_pin_B = (GPIO_PIN_SET == HAL_GPIO_ReadPin(QuadKnobB_GPIO_Port, QuadKnobB_Pin));
-			user_knob_1.update(&user_knob_1, user_knob_1_pin_A, user_knob_1_pin_B);
+//			bool user_knob_1_pin_A = (GPIO_PIN_SET == HAL_GPIO_ReadPin(QuadKnobA_GPIO_Port, QuadKnobA_Pin));
+//			bool user_knob_1_pin_B = (GPIO_PIN_SET == HAL_GPIO_ReadPin(QuadKnobB_GPIO_Port, QuadKnobB_Pin));
+//			user_knob_1.update(&user_knob_1, user_knob_1_pin_A, user_knob_1_pin_B);
 
 			// Get user command from "knob" - if any action, make it a queue packet and then mail it.
-			if (user_knob_1.get(&user_knob_1) != QUADKNOB_STILL){
-				Q_data command_packet;
-				command_packet.twist = user_knob_1.get(&user_knob_1);
-				shuffle_q.put(&shuffle_q, &command_packet);
-			}
-			snake_heading_update(&my_game, &shuffle_q);
+//			if (user_knob_1.get(&user_knob_1) != QUADKNOB_STILL){
+//				Q_data command_packet;
+//				command_packet.twist = user_knob_1.get(&user_knob_1);
+//				shuffle_q.put(&shuffle_q, &command_packet);
+//			}
+//			snake_heading_update(&my_game, &shuffle_q);
 		// ASSERT HEADING IS VALID
-			while ((my_game.heading != SNAKE_COMPASS_N)&&
-					(my_game.heading != SNAKE_COMPASS_E)&&
-					(my_game.heading != SNAKE_COMPASS_S)&&
-					(my_game.heading != SNAKE_COMPASS_W));
-			incremental_show_game((const snake_game *)&my_game, false);
+			while ((my_game.ball.dir != N)&&
+					(my_game.ball.dir != NE)&&
+					(my_game.ball.dir != E)&&
+					(my_game.ball.dir != SE)&&
+					(my_game.ball.dir != S)&&
+					(my_game.ball.dir != SW)&&
+					(my_game.ball.dir != W)&&
+					(my_game.ball.dir != NW));
+			incremental_show_game((const pong_board *)&my_game, false);
 		}
 		if (timer_isr_countdown <= 0) {
 			// Move and animate every 500 ms
@@ -229,24 +233,37 @@ void pong_main(void){
 			Q_data command_packet;
 			switch(shuffles){
 			case 0:
-				command_packet.movement = UP;
+				command_packet.movement = DOWN;
 				shuffles++;
 				shuffle_q.put(&shuffle_q, &command_packet);
-				paddle_L_shuffle(&my_game, &command_packet);
+				paddle_L_shuffle(&my_game, &shuffle_q);
 				pong_periodic_play(&my_game);
+				break;
 			case 1:
 				command_packet.movement = DOWN;
 				shuffles++;
 				shuffle_q.put(&shuffle_q, &command_packet);
+				paddle_L_shuffle(&my_game, &shuffle_q);
 				pong_periodic_play(&my_game);
+				break;
 			case 2:
+				command_packet.movement = UP;
+				shuffles++;
+				shuffle_q.put(&shuffle_q, &command_packet);
+				paddle_L_shuffle(&my_game, &shuffle_q);
+				pong_periodic_play(&my_game);
+				break;
+			case 3:
 				command_packet.movement = UP;
 				shuffles = 0;
 				shuffle_q.put(&shuffle_q, &command_packet);
+				paddle_L_shuffle(&my_game, &shuffle_q);
 				pong_periodic_play(&my_game);
+				break;
 			default:		//Error handler, throws it back to state 0
 				shuffles = 0;
 				pong_periodic_play(&my_game);
+				break;
 			}
 		}
 #endif
