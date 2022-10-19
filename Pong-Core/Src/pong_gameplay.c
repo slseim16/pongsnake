@@ -8,6 +8,7 @@
 //// STATUS - ?????.
 
 //#define UNIT_TEST_SNAKE
+#include "main.h"
 #include <pong_enums.h>
 #include <pong_gameplay.h>
 #include <stdio.h>
@@ -440,15 +441,17 @@ void pong_periodic_play(pong_board* pb){
 		pong_sphere_plot(pb);
 	}
 
-
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
 	//Checking sphere collision (is the sphere moving into a paddle, vertical wall, or ceiling/floor?)
 	//NOTE use of MAGIC NUMBERS 0 and 7-- The far coordinates
 	if((pb->ball.loc.x == (pb->paddle_L.loc.x + 1)) && (pb->ball.loc.y >= pb->paddle_L.loc.y && pb->ball.loc.y <= (pb->paddle_L.loc.y + PADDLE_HEIGHT - 1))){
 		pb->ball.dir = pong_opposite_direction(pb->ball.dir);
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
 	}
 
 	if((pb->ball.loc.x == (pb->paddle_R.loc.x - 1)) && (pb->ball.loc.y >= pb->paddle_R.loc.y && pb->ball.loc.y <= (pb->paddle_R.loc.y + PADDLE_HEIGHT - 1))){
 		pb->ball.dir = pong_opposite_direction(pb->ball.dir);
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
 	}
 
 	if(pb->ball.loc.y == 0){
