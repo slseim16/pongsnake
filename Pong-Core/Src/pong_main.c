@@ -90,6 +90,7 @@
 #include "main.h"
 #include "display_DOGS_102.h"
 //#include "quadknob.h"
+#include "keypad.h"
 #include "smc_queue.h"
 
 ///////////////////////////
@@ -131,10 +132,11 @@ void pong_main(void){
 	volatile uint16_t ram_dummy_2 = MEMORY_BARRIER_2;
 	smc_queue_init(&shuffle_q);
 
-	// Input object
-	//QuadKnob user_knob_1;
+	// Input object initialization
+//	keypad user_keypad;
 	volatile uint16_t ram_dummy_3 = MEMORY_BARRIER_3;
-	//quadknob_init(&user_knob_1);
+//	quadknob_init(&user_knob_1);
+	initbuttons();
 
 	// Output object
 	// Block all interrupts while initializing - initial protocol timing is critical.
@@ -186,6 +188,56 @@ void pong_main(void){
 //				shuffle_q.put(&shuffle_q, &command_packet);
 //			}
 //			snake_heading_update(&my_game, &shuffle_q);
+			Q_data command_packet;
+			//Paddle_L check controls
+			int control_L_paddle = 0;
+			control_L_paddle = check_column1();
+			switch(control_L_paddle){
+			case 1:
+				command_packet.movement = DOWN;
+				shuffle_q.put(&shuffle_q, &command_packet);
+				paddle_L_shuffle(&my_game, &shuffle_q);
+				pong_periodic_play(&my_game);
+				break;
+			case 2:
+				command_packet.movement = UP;
+				shuffle_q.put(&shuffle_q, &command_packet);
+				paddle_L_shuffle(&my_game, &shuffle_q);
+				pong_periodic_play(&my_game);
+				break;
+			default:
+				command_packet.movement = STAY;
+				shuffle_q.put(&shuffle_q, &command_packet);
+				paddle_L_shuffle(&my_game, &shuffle_q);
+				pong_periodic_play(&my_game);
+				break;
+			}
+
+			//Paddle_R check controls
+			int control_R_paddle = 0;
+			control_R_paddle = check_column2();
+			switch(control_R_paddle){
+			case 1:
+				command_packet.movement = DOWN;
+				shuffle_q.put(&shuffle_q, &command_packet);
+				paddle_R_shuffle(&my_game, &shuffle_q);
+				pong_periodic_play(&my_game);
+				break;
+			case 2:
+				command_packet.movement = UP;
+				shuffle_q.put(&shuffle_q, &command_packet);
+				paddle_R_shuffle(&my_game, &shuffle_q);
+				pong_periodic_play(&my_game);
+				break;
+			default:
+				command_packet.movement = STAY;
+				shuffle_q.put(&shuffle_q, &command_packet);
+				paddle_R_shuffle(&my_game, &shuffle_q);
+				pong_periodic_play(&my_game);
+				break;
+			}
+
+
 		// ASSERT HEADING IS VALID
 			while ((my_game.ball.dir != N)&&
 					(my_game.ball.dir != NE)&&
