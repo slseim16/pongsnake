@@ -192,7 +192,7 @@ void paddle_L_shuffle(pong_board* pb, Smc_queue* q){
     if (!data_available) return;
 
 	//Guard clause for paddles NOTE MAGIC NUMBERS
-	if(pb->paddle_L.loc.y <0 || pb->paddle_L.loc.y > 5){
+	if(pb->paddle_L.loc.y <= 0 || pb->paddle_L.loc.y >= 5){
 		return;
 	}
 
@@ -219,16 +219,16 @@ void paddle_R_shuffle(pong_board* pb, Smc_queue* q){
     if (!data_available) return;
 
 	//Guard clause for paddles NOTE MAGIC NUMBERS
-	if(pb->paddle_R.loc.x <0 || pb->paddle_R.loc.x > 5){
+	if(pb->paddle_R.loc.y <= 0 || pb->paddle_R.loc.y >= 5){
 		return;
 	}
 
 	switch(msg.movement){
 	case UP:
-		pb->paddle_R.loc.x++;
+		pb->paddle_R.loc.y++;
 		break;
 	case DOWN:
-		pb->paddle_R.loc.x--;
+		pb->paddle_R.loc.y--;
 		break;
 	default:
 		break;
@@ -262,7 +262,7 @@ void pong_game_init(pong_board* pb){
 	// The sphere has y bounds of 0<= loc.x <= 7 && 0<= loc.y <=7 assuming it runs into no paddles.
 	// TODO code logic for sphere hitting columns 0 and 7 (x=0 and x=7)
 
-	const XY_PT paddle_L = {0,2};
+	const XY_PT paddle_L = {0,4};
 	const XY_PT paddle_R = {7,3};
 	const XY_PT sphere = {3,3};
 

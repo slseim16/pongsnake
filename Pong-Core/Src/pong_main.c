@@ -96,7 +96,7 @@
 ///////////////////////////
 // Test -without input, the expected output = ball goes around CW on the board until it hits a wall that's not blocked by a paddle
 // Without_Input - Works!
-#define TEST_WITHOUT_INPUT
+//#define TEST_WITHOUT_INPUT
 
 // Test - with input: ... (a) Slithering is OK!
 // (b) Turning works - 1 or several detents turn correctly, reliably.
@@ -128,9 +128,11 @@ void pong_main(void){
 	pong_game_init(&my_game);
 
 	// Construct IPC REAMKE FOR KEYPAD & PONG
-	Smc_queue shuffle_q;		//Refactored to shuffle_q because it makes more sense for pong than turn
+	Smc_queue l_shuffle_q;		//queue for storing input for the left paddle
+	Smc_queue r_shuffle_q;		//queue for storing input for the right paddle
 	volatile uint16_t ram_dummy_2 = MEMORY_BARRIER_2;
-	smc_queue_init(&shuffle_q);
+	smc_queue_init(&l_shuffle_q);
+	smc_queue_init(&r_shuffle_q);
 
 	// Input object initialization
 //	keypad user_keypad;
@@ -181,61 +183,46 @@ void pong_main(void){
 //			bool user_knob_1_pin_B = (GPIO_PIN_SET == HAL_GPIO_ReadPin(QuadKnobB_GPIO_Port, QuadKnobB_Pin));
 //			user_knob_1.update(&user_knob_1, user_knob_1_pin_A, user_knob_1_pin_B);
 
-			// Get user command from "knob" - if any action, make it a queue packet and then mail it.
-//			if (user_knob_1.get(&user_knob_1) != QUADKNOB_STILL){
-//				Q_data command_packet;
-//				command_packet.twist = user_knob_1.get(&user_knob_1);
-//				shuffle_q.put(&shuffle_q, &command_packet);
-//			}
-//			snake_heading_update(&my_game, &shuffle_q);
-			Q_data command_packet;
+			//Initialize the command packet for input
+			Q_data l_command_packet;
+			Q_data r_command_packet;
 			//Paddle_L check controls
 			int control_L_paddle = 0;
 			control_L_paddle = check_column1();
 			switch(control_L_paddle){
-			case 1:
-				command_packet.movement = DOWN;
-				shuffle_q.put(&shuffle_q, &command_packet);
-				paddle_L_shuffle(&my_game, &shuffle_q);
-				pong_periodic_play(&my_game);
-				break;
 			case 2:
-				command_packet.movement = UP;
-				shuffle_q.put(&shuffle_q, &command_packet);
-				paddle_L_shuffle(&my_game, &shuffle_q);
-				pong_periodic_play(&my_game);
+				l_command_packet.movement = DOWN;
+				l_shuffle_q.put(&l_shuffle_q, &l_command_packet);
+				break;
+			case 1:
+				l_command_packet.movement = UP;
+				l_shuffle_q.put(&l_shuffle_q, &l_command_packet);
 				break;
 			default:
-				command_packet.movement = STAY;
-				shuffle_q.put(&shuffle_q, &command_packet);
-				paddle_L_shuffle(&my_game, &shuffle_q);
-				pong_periodic_play(&my_game);
+				l_command_packet.movement = STAY;
+				l_shuffle_q.put(&l_shuffle_q, &l_command_packet);
 				break;
 			}
+			paddle_L_shuffle(&my_game, &l_shuffle_q);
 
 			//Paddle_R check controls
 			int control_R_paddle = 0;
 			control_R_paddle = check_column2();
 			switch(control_R_paddle){
-			case 1:
-				command_packet.movement = DOWN;
-				shuffle_q.put(&shuffle_q, &command_packet);
-				paddle_R_shuffle(&my_game, &shuffle_q);
-				pong_periodic_play(&my_game);
-				break;
 			case 2:
-				command_packet.movement = UP;
-				shuffle_q.put(&shuffle_q, &command_packet);
-				paddle_R_shuffle(&my_game, &shuffle_q);
-				pong_periodic_play(&my_game);
+				r_command_packet.movement = DOWN;
+				r_shuffle_q.put(&r_shuffle_q, &r_command_packet);
+				break;
+			case 1:
+				r_command_packet.movement = UP;
+				r_shuffle_q.put(&r_shuffle_q, &r_command_packet);
 				break;
 			default:
-				command_packet.movement = STAY;
-				shuffle_q.put(&shuffle_q, &command_packet);
-				paddle_R_shuffle(&my_game, &shuffle_q);
-				pong_periodic_play(&my_game);
+				r_command_packet.movement = STAY;
+				r_shuffle_q.put(&r_shuffle_q, &r_command_packet);
 				break;
 			}
+			paddle_R_shuffle(&my_game, &r_shuffle_q);
 
 
 		// ASSERT HEADING IS VALID
@@ -247,13 +234,13 @@ void pong_main(void){
 					(my_game.ball.dir != SW)&&
 					(my_game.ball.dir != W)&&
 					(my_game.ball.dir != NW));
-			incremental_show_game((const pong_board *)&my_game, false);
+			incremental_show_game(&my_game, false);
 		}
 		if (timer_isr_countdown <= 0) {
 			// Move and animate every 500 ms
 			timer_isr_countdown = timer_isr_500ms_restart;
 			pong_periodic_play(&my_game);
-			incremental_show_game(&my_game, true);
+//			incremental_show_game(&my_game, true);
 		}
 #endif
 #ifdef TEST_WITHOUT_INPUT
@@ -287,29 +274,29 @@ void pong_main(void){
 			case 0:
 				command_packet.movement = DOWN;
 				shuffles++;
-				shuffle_q.put(&shuffle_q, &command_packet);
-				paddle_L_shuffle(&my_game, &shuffle_q);
+				l_shuffle_q.put(&l_shuffle_q, &command_packet);
+				paddle_L_shuffle(&my_game, &l_shuffle_q);
 				pong_periodic_play(&my_game);
 				break;
 			case 1:
 				command_packet.movement = DOWN;
 				shuffles++;
-				shuffle_q.put(&shuffle_q, &command_packet);
-				paddle_L_shuffle(&my_game, &shuffle_q);
+				l_shuffle_q.put(&l_shuffle_q, &command_packet);
+				paddle_L_shuffle(&my_game, &l_shuffle_q);
 				pong_periodic_play(&my_game);
 				break;
 			case 2:
 				command_packet.movement = UP;
 				shuffles++;
-				shuffle_q.put(&shuffle_q, &command_packet);
-				paddle_L_shuffle(&my_game, &shuffle_q);
+				l_shuffle_q.put(&l_shuffle_q, &command_packet);
+				paddle_L_shuffle(&my_game, &l_shuffle_q);
 				pong_periodic_play(&my_game);
 				break;
 			case 3:
 				command_packet.movement = UP;
 				shuffles = 0;
-				shuffle_q.put(&shuffle_q, &command_packet);
-				paddle_L_shuffle(&my_game, &shuffle_q);
+				l_shuffle_q.put(&l_shuffle_q, &command_packet);
+				paddle_L_shuffle(&my_game, &l_shuffle_q);
 				pong_periodic_play(&my_game);
 				break;
 			default:		//Error handler, throws it back to state 0
@@ -317,6 +304,7 @@ void pong_main(void){
 				pong_periodic_play(&my_game);
 				break;
 			}
+//			incremental_show_game(&my_game, true);
 		}
 #endif
 	}

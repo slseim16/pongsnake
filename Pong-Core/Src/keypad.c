@@ -6,6 +6,8 @@
  */
 #include <keypad.h>
 #include "main.h"
+
+//Changed ReadPin lines from == 0 to == 1
 void initbuttons(){
 	GPIOC->ODR |= 1<<8;
 }

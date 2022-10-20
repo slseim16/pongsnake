@@ -33,7 +33,7 @@ typedef union {
 		int int_val;
 		float float_val;
 //		int8_t board[CHECKS_WIDE][CHECKS_WIDE];		//Potential for board to be passed via queues
-		enum move movement;							//Movement enum for paddles
+		enum move movement;							//Movement enum for left paddle
 } Q_data;
 
 typedef struct smc_queue_struct {
