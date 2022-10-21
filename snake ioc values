@@ -10,11 +10,11 @@ PB6 -> GPIO_OUTPUT
 
 PC8 -> GPIO_OUTPUT
 PC6 -> GPIO_OUTPUT
-PA11 -> GPIO_INPUT
-PA12 -> GPIO_INPUT
+PA11 -> GPIO_INPUT Turn on pull-up resistor
+PA12 -> GPIO_INPUT Turn on pull-up resistor
 TIM17
 Activated
-TIM17 global interrup -> Enabled
+TIM17 global interrupt -> Enabled
 
 SPI2
 Activated
