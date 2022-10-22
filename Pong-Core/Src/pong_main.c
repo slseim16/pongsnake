@@ -1,82 +1,12 @@
 // Pong game demo for STM Board Nucleo-G071RB
 // Based off Snake game demo
-// seand,
+// Sean, Spencer, and Bradyn
 // carrolls@trine.edu
 // Copyright 2022 Sean Carroll
 // 2022.7.26
 //
-// SURPRISE - I had to add "#include <stddef.h>' into file sysmem.c to define
-// symbol NULL. An oversight by STM? Nice that it seems to be allowed --
-// CLEAN and autobuild did not overwrite my improvement.
-
-// This demo project shows coding examples of:
-// * Comments
-// * JPL compliance
-// * Encapsulated, asynchronous IPC (queues)
-// * ANSI C
-// * OOP
-// * Task-decoupling
-// * Separated timing and operation logic
+// This demo is based off the SNAKE demo, and as such borrows most of its drivers and structure
 //
-// Code overview:
-// "Control" (i.e. input) in this project is
-// one quad-encoded knob that sends messages
-// {CW/CCW/NO_TURN} to the "model" via queue.
-// The Model (aka process logic) plays "snake" on an 8x8
-// grid; the model uses a queue to send a message
-// "ready" to the "view."
-// The View (i.e. output layer) draws the snake and
-// fruit onto a 64 x 128 pixel display using 8x8 squares.
-//
-// Disclaimer:
-// Yes - it could be prettier, but this is a demo of
-// coding practices, not gaming.
-// NOTES ON INTERRUPTS
-// * I selected timer TIM17 as a periodic timer interrupt (simple timer)
-// * CubeMX will generate "static void MX_TIM17_Init(void)" in main.c
-// * I wrote the handler - named
-// >> "void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)"
-// >> as "{timer_isr_count--;}"
-// >> where "timer_isr_count" is a volatile int global that I defined.
-// * I added the line "HAL_TIM_Base_Start_IT(&htim17);" right after the
-// >> CubeMX code calling "MX_TIM17_Init();"
-//
-// >> >> DOCUMENTATION is tricky: How did I find the name for the ISR, which
-// >> >> appears to be "HAL_TIM_PeriodElapsedCallback"? Did I make it up?
-// >> >> TWO answers: (1) Find a set of example projects online, and look
-// >> >> through them until you find one that uses the interrupt you want.
-// >> >> Answer(2): the ISR name is fixed by the Hardware Abstraction Layer
-// >> >> header files. To find the name for any interrupt, start
-// >> >> by finding the file Core/Inc/stm32g0xx_hal_conf.h
-// >> >> in the project -- it points to all the other include files that our
-// >> >> chip needs. There is one include file for each peripheral type,
-// >> >> including the generic timer. Then find the name for the file that
-// >> >> holds timer ISR names. Depending on how you like the IDE, there
-// >> >> are 2 seek methods...
-// >> >>
-// >> >> File-seeking method #2A: You can use the CubeIDE to expand
-// >> >> [> stm32g0xx_hal_conf.h] by clicking on the [ > ]. You'll see about
-// >> >> 30 files, and stm32g0xx_hal_tim.h is one of them. Double-click it to
-// >> >> find the line of stm32g0xx_hal_conf.h that #includes it.
-// >> >>
-// >> >> File-seeking method 2B: Slower, but does not depend on CubeIDE to
-// >> >> extract file names. Open the file stm32g0xx_hal_conf.h. Near the
-// >> >> bottom of that file, you'll find an "#ifdef HAL_TIM_MODULE_ENABLED"
-// >> >> which is should be true if we intend to use any timers. This is the
-// >> >> same line that you'd find using file-seeking method 2A.
-// >> >> ONCE YOU FIND THE FILENAME "stm32g0xx_hal_tim.h"
-// >> >> Once the file. Search for the word "callback" because that is what
-// >> >> the HAL calls developer-written ISRs. My advice - Search backwards
-// >> >> from the bottom of the file - usually constants are defined first,
-// >> >> and function names at the end. In the version of the file from year
-// >> >> 2022, the callback names for timers start at line # 2380, and the 1st
-// >> >> one is void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim);
-// >> >>
-// >> >> THAT'S WHAT I WANT! "Call this every time the period elapses"
-// >> >> sounds very promising. When I tried to out, it works as expected,
-// >> >> after I debugged it: the configuration given does not START the
-// >> >> timer. Add in the line "HAL_TIM_Base_Start_IT(&htim17);" right at the top
-// >> >> of the User Code Part 2 in main.c.
 
 
 #include <stdint.h>
@@ -94,17 +24,13 @@
 #include "smc_queue.h"
 
 ///////////////////////////
-// Test -without input, the expected output = ball goes around CW on the board until it hits a wall that's not blocked by a paddle
+// Test -without input, the expected output = ball goes around the board until it hits a wall that's not blocked by a paddle
 // Without_Input - Works!
 //#define TEST_WITHOUT_INPUT
 
-// Test - with input: ... (a) Slithering is OK!
-// (b) Turning works - 1 or several detents turn correctly, reliably.
-// (c) New fruit is visible.
-// (d) The tail of the snake follows the head correctly.
-// (e) the display sometimes flips to 12-o'clock position instead of
-// 6 o'clock? SUSPICIOUS - wiring/ground at the knob... when I am gentle
-// this does not happen. ACCEPTABLE.
+// Test - with input:
+// 1. Paddles move up and down within the bounds of the board
+// 2. Ball can move to all legal positions and all illegal positions & game ending positions end the game
 
 extern volatile int32_t timer_isr_countdown; // Required to control timing
 const int game_board_size = CHECKS_WIDE; // Provided for extern
@@ -138,7 +64,7 @@ void pong_main(void){
 //	keypad user_keypad;
 	volatile uint16_t ram_dummy_3 = MEMORY_BARRIER_3;
 //	quadknob_init(&user_knob_1);
-	initbuttons();
+	initbuttons();				//Keypad func that initializes the button lines
 
 	// Output object
 	// Block all interrupts while initializing - initial protocol timing is critical.
@@ -151,9 +77,7 @@ void pong_main(void){
 	display_checkerboard();
 	while (timer_isr_countdown > 0){}
 	timer_isr_countdown = timer_isr_500ms_restart;
-	// Confirm all the rules and paint the initial snake.
 	display_blank();
-	//snake_game_cleanup(&my_game);
 
 	// OPERATE THE GAME
 	int32_t prior_timer_countdown = timer_isr_countdown;
@@ -171,7 +95,7 @@ void pong_main(void){
 		}
 
 #ifndef TEST_WITHOUT_INPUT
-		// Check for user input every 1 ms & paint one block of the display.
+		// Check for user input every 1 ms
 		if (prior_timer_countdown != timer_isr_countdown ){
 			prior_timer_countdown = timer_isr_countdown;
 			// If time changed, about 1 ms has elapsed.
@@ -188,41 +112,52 @@ void pong_main(void){
 			Q_data r_command_packet;
 			//Paddle_L check controls
 			int control_L_paddle = 0;
+			int control_R_paddle = 0;
+			static int old_l_control = 0;
+			static int old_r_control = 0;
 			control_L_paddle = check_column1();
-			switch(control_L_paddle){
-			case 2:
-				l_command_packet.movement = DOWN;
-				l_shuffle_q.put(&l_shuffle_q, &l_command_packet);
-				break;
-			case 1:
-				l_command_packet.movement = UP;
-				l_shuffle_q.put(&l_shuffle_q, &l_command_packet);
-				break;
-			default:
-				l_command_packet.movement = STAY;
-				l_shuffle_q.put(&l_shuffle_q, &l_command_packet);
-				break;
+			control_R_paddle = check_column2();
+			if (control_L_paddle != old_l_control){
+				switch(control_L_paddle){
+				case 1:
+					l_command_packet.movement = DOWN;
+					l_shuffle_q.put(&l_shuffle_q, &l_command_packet);
+					break;
+				case 2:
+					l_command_packet.movement = UP;
+					l_shuffle_q.put(&l_shuffle_q, &l_command_packet);
+					break;
+				default:
+					l_command_packet.movement = STAY;
+					l_shuffle_q.put(&l_shuffle_q, &l_command_packet);
+					break;
+				}
+				paddle_L_shuffle(&my_game, &l_shuffle_q);
+				old_l_control = control_L_paddle;
 			}
-			paddle_L_shuffle(&my_game, &l_shuffle_q);
+
 
 			//Paddle_R check controls
-			int control_R_paddle = 0;
-			control_R_paddle = check_column2();
-			switch(control_R_paddle){
-			case 2:
-				r_command_packet.movement = DOWN;
-				r_shuffle_q.put(&r_shuffle_q, &r_command_packet);
-				break;
-			case 1:
-				r_command_packet.movement = UP;
-				r_shuffle_q.put(&r_shuffle_q, &r_command_packet);
-				break;
-			default:
-				r_command_packet.movement = STAY;
-				r_shuffle_q.put(&r_shuffle_q, &r_command_packet);
-				break;
+			if(control_R_paddle != old_r_control){
+				switch(control_R_paddle){
+				case 1:
+					r_command_packet.movement = DOWN;
+					r_shuffle_q.put(&r_shuffle_q, &r_command_packet);
+					break;
+				case 2:
+					r_command_packet.movement = UP;
+					r_shuffle_q.put(&r_shuffle_q, &r_command_packet);
+					break;
+				default:
+					r_command_packet.movement = STAY;
+					r_shuffle_q.put(&r_shuffle_q, &r_command_packet);
+					break;
+				}
+				paddle_R_shuffle(&my_game, &r_shuffle_q);
+				old_r_control = control_R_paddle;
 			}
-			paddle_R_shuffle(&my_game, &r_shuffle_q);
+
+
 
 
 		// ASSERT HEADING IS VALID
@@ -272,28 +207,28 @@ void pong_main(void){
 			Q_data command_packet;
 			switch(shuffles){
 			case 0:
-				command_packet.movement = DOWN;
+				command_packet.movement = UP;
 				shuffles++;
 				l_shuffle_q.put(&l_shuffle_q, &command_packet);
 				paddle_L_shuffle(&my_game, &l_shuffle_q);
 				pong_periodic_play(&my_game);
 				break;
 			case 1:
-				command_packet.movement = DOWN;
+				command_packet.movement = UP;
 				shuffles++;
 				l_shuffle_q.put(&l_shuffle_q, &command_packet);
 				paddle_L_shuffle(&my_game, &l_shuffle_q);
 				pong_periodic_play(&my_game);
 				break;
 			case 2:
-				command_packet.movement = UP;
+				command_packet.movement = DOWN;
 				shuffles++;
 				l_shuffle_q.put(&l_shuffle_q, &command_packet);
 				paddle_L_shuffle(&my_game, &l_shuffle_q);
 				pong_periodic_play(&my_game);
 				break;
 			case 3:
-				command_packet.movement = UP;
+				command_packet.movement = DOWN;
 				shuffles = 0;
 				l_shuffle_q.put(&l_shuffle_q, &command_packet);
 				paddle_L_shuffle(&my_game, &l_shuffle_q);

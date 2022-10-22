@@ -46,7 +46,7 @@ typedef struct {
 	pong_sphere ball;
 } pong_board;
 
-enum pong_ball_dirs pong_opposite_direction(enum pong_ball_dirs d);
+enum pong_ball_dirs pong_opposite_direction(pong_sphere ps);
 void pong_game_init(pong_board* pb);
 void paddle_L_shuffle(pong_board* pb, Smc_queue* q);
 void paddle_R_shuffle(pong_board* pb, Smc_queue* q);
