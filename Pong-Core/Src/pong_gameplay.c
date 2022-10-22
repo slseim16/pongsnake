@@ -24,19 +24,20 @@
 // pong_opposite_direction(d) is a utility based on snake_opposite_direction (loosely).
 // It is used to change direction of pong ball when it collides with a paddle
 // or the ceiling/floor.
-enum pong_ball_dirs pong_opposite_direction(enum pong_ball_dirs d){
+enum pong_ball_dirs pong_opposite_direction(pong_sphere ps){
+	enum pong_ball_dirs d = ps.dir;
 // This encourages the ball to spin in a clockwise direction on the board
-	switch(d){
-	case N: return S; break;
-	case NE: return NW; break;
-	case E: return W; break;
-	case SE: return NE; break;
-	case S: return N; break;
-	case SW: return SE; break;
-	case W: return E; break;
-	case NW: return SW; break;
-	default: return d;
-	}
+//	switch(d){
+//	case N: return S; break;
+//	case NE: return NW; break;
+//	case E: return W; break;
+//	case SE: return NE; break;
+//	case S: return N; break;
+//	case SW: return SE; break;
+//	case W: return E; break;
+//	case NW: return SW; break;
+//	default: return d;
+//	}
 // This knocks the ball back in the same direction it came
 //	switch(d){
 //	case N: return S; break;
@@ -49,6 +50,79 @@ enum pong_ball_dirs pong_opposite_direction(enum pong_ball_dirs d){
 //	case NW: return SE; break;
 //	default: return d;
 //	}
+
+	//This is the ultimate directionator, although it needs to know the pong_sphere's location so it can adjust for the major 8 collisions
+
+
+	if(ps.loc.x == 1 && ps.loc.y == 0){
+		return SE;
+	}
+
+	if(ps.loc.x == 6 && ps.loc.y == 0){
+		return SW;
+	}
+
+	if(ps.loc.x == 1 && ps.loc.y == 7){
+		return NE;
+	}
+
+	if(ps.loc.x == 6 && ps.loc.y == 7){
+		return NW;
+	}
+
+	else if (ps.loc.y == 0){
+		switch(d){
+		case NE:
+			return SE; break;
+		case NW:
+			return SW; break;
+		default:
+			return d;
+		}
+	}
+	else if (ps.loc.y == 7){
+		switch(d){
+		case SE:
+			return NE; break;
+		case SW:
+			return NW; break;
+		default:
+			return d;
+		}
+	}
+	else if (ps.loc.x == 1){
+		switch(d){
+		case NW:
+			return NE; break;
+		case SW:
+			return SE; break;
+		default:
+			return d;
+		}
+	}
+	else if (ps.loc.x == 6){
+		switch(d){
+		case NE:
+			return NW; break;
+		case SE:
+			return SW; break;
+		default:
+			return d;
+		}
+	}
+	else{
+		switch(d){
+		case N: return S; break;
+		case NE: return SW; break;
+		case E: return W; break;
+		case SE: return NW; break;
+		case S: return N; break;
+		case SW: return NE; break;
+		case W: return E; break;
+		case NW: return SE; break;
+		default: return d;
+		}
+	}
 }
 
 
@@ -148,17 +222,17 @@ bool paddle_plot(pong_board *pb){
 	int8_t ry = pb->paddle_R.loc.y;
 
 	//Guard clause for paddles NOTE MAGIC NUMBERS
-	if(pb->paddle_L.loc.y <0 || pb->paddle_L.loc.y > 5){
-//		ok = false;
+//	if(pb->paddle_L.loc.y <0 || pb->paddle_L.loc.y > 5){
+////		ok = false;
+////		return ok;
 //		return ok;
-		return ok;
-	}
-
-	if(pb->paddle_R.loc.y <0 || pb->paddle_R.loc.y > 5){
-//		ok = false;
+//	}
+//
+//	if(pb->paddle_R.loc.y <0 || pb->paddle_R.loc.y > 5){
+////		ok = false;
+////		return ok;
 //		return ok;
-		return ok;
-	}
+//	}
 
 	//Plots the paddles
 	for(int i=0; i<PADDLE_WIDTH; i++){
@@ -191,17 +265,22 @@ void paddle_L_shuffle(pong_board* pb, Smc_queue* q){
 	data_available = q->get(q, &msg);
     if (!data_available) return;
 
-	//Guard clause for paddles NOTE MAGIC NUMBERS
-	if(pb->paddle_L.loc.y <= 0 || pb->paddle_L.loc.y >= 5){
-		return;
-	}
+    int16_t y_future;
 
 	switch(msg.movement){
 	case UP:
-		pb->paddle_L.loc.y--;
+		y_future = pb->paddle_L.loc.y + 1;
+		if(y_future < 0 || y_future > 5){
+			return;
+		}
+		pb->paddle_L.loc.y++;
 		break;
 	case DOWN:
-		pb->paddle_L.loc.y++;
+		y_future = pb->paddle_L.loc.y - 1;
+		if(y_future < 0 || y_future > 5){
+			return;
+		}
+		pb->paddle_L.loc.y--;
 		break;
 	default:
 		break;
@@ -218,16 +297,22 @@ void paddle_R_shuffle(pong_board* pb, Smc_queue* q){
 	data_available = q->get(q, &msg);
     if (!data_available) return;
 
-	//Guard clause for paddles NOTE MAGIC NUMBERS
-	if(pb->paddle_R.loc.y <= 0 || pb->paddle_R.loc.y >= 5){
-		return;
-	}
+    //Stores the future y value within the case statements, used in guard clauses
+    int16_t y_future;
 
 	switch(msg.movement){
 	case UP:
+		y_future = pb->paddle_R.loc.y + 1;
+		if(y_future < 0 || y_future > 5){
+			return;
+		}
 		pb->paddle_R.loc.y++;
 		break;
 	case DOWN:
+		y_future = pb->paddle_R.loc.y - 1;
+		if(y_future < 0 || y_future > 5){
+			return;
+		}
 		pb->paddle_R.loc.y--;
 		break;
 	default:
@@ -264,7 +349,7 @@ void pong_game_init(pong_board* pb){
 
 	const XY_PT paddle_L = {0,4};
 	const XY_PT paddle_R = {7,3};
-	const XY_PT sphere = {3,3};
+	const XY_PT sphere = {3,2};
 
 //	const XY_PT initial_head = {3,3};
 //	const XY_PT initial_fruit = {3,6};
@@ -444,33 +529,33 @@ void pong_periodic_play(pong_board* pb){
 	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
 	//Checking sphere collision (is the sphere moving into a paddle, vertical wall, or ceiling/floor?)
 	//NOTE use of MAGIC NUMBERS 0 and 7-- The far coordinates
-	if((pb->ball.loc.x == (pb->paddle_L.loc.x + 1)) && (pb->ball.loc.y >= pb->paddle_L.loc.y && pb->ball.loc.y <= (pb->paddle_L.loc.y + PADDLE_HEIGHT - 1))){
-		pb->ball.dir = pong_opposite_direction(pb->ball.dir);
+	if((pb->ball.loc.x == (pb->paddle_L.loc.x + 1)) && (pb->ball.loc.y >= pb->paddle_L.loc.y && pb->ball.loc.y <= (pb->paddle_L.loc.y + PADDLE_HEIGHT))){
+		pb->ball.dir = pong_opposite_direction(pb->ball);
 		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
 	}
 
-	if((pb->ball.loc.x == (pb->paddle_R.loc.x - 1)) && (pb->ball.loc.y >= pb->paddle_R.loc.y && pb->ball.loc.y <= (pb->paddle_R.loc.y + PADDLE_HEIGHT - 1))){
-		pb->ball.dir = pong_opposite_direction(pb->ball.dir);
+	if((pb->ball.loc.x == (pb->paddle_R.loc.x - 1)) && (pb->ball.loc.y >= pb->paddle_R.loc.y && pb->ball.loc.y <= (pb->paddle_R.loc.y + PADDLE_HEIGHT))){
+		pb->ball.dir = pong_opposite_direction(pb->ball);
 		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
 	}
 
-	if(pb->ball.loc.y == 0){
-		pb->ball.dir = pong_opposite_direction(pb->ball.dir);
+	else if(pb->ball.loc.y == 0){
+		pb->ball.dir = pong_opposite_direction(pb->ball);
 //		display_checkerboard();
 	}
-	if(pb->ball.loc.y == 7){
-		pb->ball.dir = pong_opposite_direction(pb->ball.dir);
+	else if(pb->ball.loc.y == 7){
+		pb->ball.dir = pong_opposite_direction(pb->ball);
 //		display_checkerboard();
 	}
 
 	//NOTE THESE CONDITIONS END THE GAME, GAME MUST BE RESET
-	if(pb->ball.loc.x == 0){
-//		pb->ball.dir = pong_opposite_direction(pb->ball.dir);
+	else if(pb->ball.loc.x < 0){
+//		pb->ball.dir = pong_opposite_direction(pb->ball);
 		display_checkerboard();
 		while(1);
 	}
-	if(pb->ball.loc.x == 7){
-//		pb->ball.dir = pong_opposite_direction(pb->ball.dir);
+	else if(pb->ball.loc.x > 7){
+//		pb->ball.dir = pong_opposite_direction(pb->ball);
 		display_checkerboard();
 		while(1);
 	}
