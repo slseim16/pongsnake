@@ -150,7 +150,7 @@ void pong_main(void){
 				old_r_control = control_R_paddle;
 			}
 
-		// ASSERT HEADING IS VALID
+		// ASSERT DIRECTION IS VALID
 			while ((my_game.ball.dir != N)&&
 					(my_game.ball.dir != NE)&&
 					(my_game.ball.dir != E)&&
