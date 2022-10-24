@@ -20,10 +20,8 @@ int check_column1(){
 	else if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_12)==0){
 		updown=2;
 	}
-
 	GPIOC->ODR &=~(1<<8);
 	GPIOC->ODR |= (1<<6);
-
 	return updown;
 }
 int check_column2(){
