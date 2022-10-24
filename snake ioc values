@@ -22,3 +22,12 @@ Mode -> Transmit Only Master
 Data Size -> 8 bits
 Prescaler (for Baud Rate) -> 4
 Baud Rate -> 4.0 MBits/s
+
+NOTE
+The code as of 10/24 will produce 1sec pong
+To get 1/2sec pong, overclock
+
+Clock Configuration
+Change SysClock to PLLCLK
+PLLM -> 2
+For Super-Speedy Pong, don't change PLLM
