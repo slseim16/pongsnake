@@ -209,38 +209,6 @@ void paddle_shuffle(pong_paddle* pd, Smc_queue* q){
 	}
 }
 
-void paddle_R_shuffle(pong_board* pb, Smc_queue* q){
-	//State machine for determining how to modify the loc of paddle_L then plotting it
-
-	//Checks if there is data on the queue
-	Q_data msg;
-	bool data_available;
-	data_available = q->get(q, &msg);
-    if (!data_available) return;
-
-    //Store the future y value, essential to keep the paddles from disappearing from this plane of existence
-    int16_t y_future;
-
-	switch(msg.movement){
-	case UP:
-		y_future = pb->paddle_R.loc.y + 1;
-		if(y_future < 0 || y_future > 5){
-			return;
-		}
-		pb->paddle_R.loc.y++;
-		break;
-	case DOWN:
-		y_future = pb->paddle_R.loc.y - 1;
-		if(y_future < 0 || y_future > 5){
-			return;
-		}
-		pb->paddle_R.loc.y--;
-		break;
-	default:
-		break;
-	}
-}
-
 void pong_game_init(pong_board* pb){
 	// BOARD STRUCTURE
 	// The board is set up in an 8x8 matrix below
