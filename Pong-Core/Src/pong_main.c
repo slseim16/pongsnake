@@ -95,17 +95,11 @@ void pong_main(void){
 		}
 
 #ifndef TEST_WITHOUT_INPUT
-		// Check for user input every 1 ms
+		// Check for user input every 1 ms & paint one block of the display.
 		if (prior_timer_countdown != timer_isr_countdown ){
 			prior_timer_countdown = timer_isr_countdown;
 			// If time changed, about 1 ms has elapsed.
-			// Once each 1 ms, read input pins from user knob and then
-			// update "knob" object (which debounces each input pin and
-			// then calculates user command).
-
-//			bool user_knob_1_pin_A = (GPIO_PIN_SET == HAL_GPIO_ReadPin(QuadKnobA_GPIO_Port, QuadKnobA_Pin));
-//			bool user_knob_1_pin_B = (GPIO_PIN_SET == HAL_GPIO_ReadPin(QuadKnobB_GPIO_Port, QuadKnobB_Pin));
-//			user_knob_1.update(&user_knob_1, user_knob_1_pin_A, user_knob_1_pin_B);
+			// Once each 1 ms, read input pins from KEYPAD
 
 			//Initialize the command packet for input
 			Q_data l_command_packet;
@@ -132,10 +126,9 @@ void pong_main(void){
 					l_shuffle_q.put(&l_shuffle_q, &l_command_packet);
 					break;
 				}
-				paddle_L_shuffle(&my_game, &l_shuffle_q);
+				paddle_shuffle(&my_game.paddle_L, &l_shuffle_q);
 				old_l_control = control_L_paddle;
 			}
-
 
 			//Paddle_R check controls
 			if(control_R_paddle != old_r_control){
@@ -153,12 +146,9 @@ void pong_main(void){
 					r_shuffle_q.put(&r_shuffle_q, &r_command_packet);
 					break;
 				}
-				paddle_R_shuffle(&my_game, &r_shuffle_q);
+				paddle_shuffle(&my_game.paddle_R, &r_shuffle_q);
 				old_r_control = control_R_paddle;
 			}
-
-
-
 
 		// ASSERT HEADING IS VALID
 			while ((my_game.ball.dir != N)&&
@@ -172,10 +162,9 @@ void pong_main(void){
 			incremental_show_game(&my_game, false);
 		}
 		if (timer_isr_countdown <= 0) {
-			// Move and animate every 500 ms
+			// Move every 500 ms
 			timer_isr_countdown = timer_isr_500ms_restart;
 			pong_periodic_play(&my_game);
-//			incremental_show_game(&my_game, true);
 		}
 #endif
 #ifdef TEST_WITHOUT_INPUT
@@ -190,18 +179,6 @@ void pong_main(void){
 		if (timer_isr_countdown <= 0) {
 			// Move and animate every 500 ms
 			timer_isr_countdown = timer_isr_500ms_restart;
-//			if (shuffles < 3){
-//				shuffles ++;
-//				pong_periodic_play(&my_game);
-//			}
-//			else {
-//				shuffles = 0;
-//				Q_data command_packet = {.twist = QUADKNOB_CW};
-//				shuffle_q.put(&shuffle_q, &command_packet);
-//				snake_heading_update(&my_game, &shuffle_q);
-//				pong_periodic_play(&my_game);
-//			}
-//			incremental_show_game(&my_game, true);
 
 			//Initialize input command packet states
 			Q_data command_packet;
@@ -239,7 +216,6 @@ void pong_main(void){
 				pong_periodic_play(&my_game);
 				break;
 			}
-//			incremental_show_game(&my_game, true);
 		}
 #endif
 	}
