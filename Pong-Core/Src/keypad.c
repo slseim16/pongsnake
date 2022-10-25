@@ -12,7 +12,7 @@ void initbuttons(){
 	GPIOC->ODR |= 1<<8;
 }
 int check_column1(){
-	int updown;
+	uint8_t updown;
 	updown=0;
 	if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_11)==0){
 		updown=1;
@@ -25,7 +25,7 @@ int check_column1(){
 	return updown;
 }
 int check_column2(){
-	int updown=0;
+	uint8_t updown=0;
 	if(HAL_GPIO_ReadPin (GPIOA, GPIO_PIN_11)==0){
 		updown=1;
 	}
