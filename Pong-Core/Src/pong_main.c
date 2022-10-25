@@ -105,10 +105,10 @@ void pong_main(void){
 			Q_data l_command_packet;
 			Q_data r_command_packet;
 			//Paddle_L check controls
-			int control_L_paddle = 0;
-			int control_R_paddle = 0;
-			static int old_l_control = 0;
-			static int old_r_control = 0;
+			uint8_t control_L_paddle = 0;
+			uint8_t control_R_paddle = 0;
+			static uint8_t old_l_control = 0;
+			static uint8_t old_r_control = 0;
 			control_L_paddle = check_column1();
 			control_R_paddle = check_column2();
 			if (control_L_paddle != old_l_control){
@@ -170,7 +170,7 @@ void pong_main(void){
 #ifdef TEST_WITHOUT_INPUT
 		// This block of code tests if the game works by spoofing paddle shuffle inputs.
 		// L paddle moves up, down, then up, and loops back. R paddle stays put.
-		static int shuffles = 0;
+		static uint8_t shuffles = 0;
 		// Normally "check for user input every 1 ms & show" - here just update display
 		if (prior_timer_countdown != timer_isr_countdown ){
 			prior_timer_countdown = timer_isr_countdown;
