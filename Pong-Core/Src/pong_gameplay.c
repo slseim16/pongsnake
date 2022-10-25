@@ -155,14 +155,14 @@ bool paddle_plot(pong_board *pb){
 	int8_t ry = pb->paddle_R.loc.y;
 
 	//Plots the paddles
-	for(int i=0; i<PADDLE_WIDTH; i++){
-		for(int j=0; j<PADDLE_HEIGHT; j++){
+	for(uint8_t i=0; i<PADDLE_WIDTH; i++){
+		for(uint8_t j=0; j<PADDLE_HEIGHT; j++){
 			pb->board[lx + i][ly + j] = pb->paddle_L.paddle_object;
 		}
 	}
 
-	for(int i=0; i<PADDLE_WIDTH; i++){
-		for(int j=0; j<PADDLE_HEIGHT; j++){
+	for(uint8_t i=0; i<PADDLE_WIDTH; i++){
+		for(uint8_t j=0; j<PADDLE_HEIGHT; j++){
 			pb->board[rx + i][ry + j] = pb->paddle_R.paddle_object;
 		}
 	}
@@ -238,8 +238,8 @@ void pong_game_init(pong_board* pb){
 	const XY_PT sphere = {3,2};
 
 	//Initialize the pong board empty squares
-	for(int i=0; i<CHECKS_WIDE; i++){
-		for(int j=0; j<CHECKS_WIDE; j++){
+	for(uint8_t i=0; i<CHECKS_WIDE; i++){
+		for(uint8_t j=0; j<CHECKS_WIDE; j++){
 			pb->board[i][j]=0;
 		}
 	}
@@ -262,8 +262,8 @@ void pong_game_init(pong_board* pb){
 
 void pong_periodic_play(pong_board* pb){
 	//Clear the board
-	for (int x = 0; x < CHECKS_WIDE; x++){
-		for (int y = 0; y < CHECKS_WIDE; y++){
+	for (uint8_t x = 0; x < CHECKS_WIDE; x++){
+		for (uint8_t y = 0; y < CHECKS_WIDE; y++){
 			pb->board[x][y] = 0;
 		}
 	}

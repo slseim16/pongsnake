@@ -18,6 +18,6 @@ typedef
 	int button9;
 }keypad;
 void initbuttons();
-int check_column1();
-int check_column2();
+uint8_t check_column1();
+uint8_t check_column2();
 #endif /* INC_KEYPAD_H_ */

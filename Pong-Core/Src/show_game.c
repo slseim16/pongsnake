@@ -16,8 +16,8 @@ void incremental_show_game(pong_board* pb, bool board_updated){
 
 	if (board_updated){
 		//Clear the board
-		for(int i=0; i<CHECKS_WIDE; i++){
-			for(int j=0; j<CHECKS_WIDE; j++){
+		for(uint8_t i=0; i<CHECKS_WIDE; i++){
+			for(uint8_t j=0; j<CHECKS_WIDE; j++){
 				pb->board[i][j] = 0;
 			}
 		}
