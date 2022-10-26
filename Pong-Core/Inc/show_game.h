@@ -5,10 +5,10 @@
  *      Author: carrolls
  */
 
+#include <pong_gameplay.h>
+
 #ifndef INC_SHOW_GAME_H_
 #define INC_SHOW_GAME_H_
-
-#include <pong_gameplay.h>
 
 void incremental_show_game(pong_board* pb, bool board_updated);       //Potentially useful for pong
 
