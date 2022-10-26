@@ -6,15 +6,14 @@
  *      Edited: seand
  */
 
-#ifndef INC_SMC_QUEUE_STRUCT_H_
-#define INC_SMC_QUEUE_STRUCT_H_
-
 
 #include <pong_enums.h>
 #include <stddef.h> // size_t
 #include <stdint.h>
 #include <stdbool.h>
 
+#ifndef INC_SMC_QUEUE_STRUCT_H_
+#define INC_SMC_QUEUE_STRUCT_H_
 
 #define SMC_Q_BUFSIZE 10
 
