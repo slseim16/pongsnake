@@ -6,14 +6,14 @@
  *      Edited: seand
  */
 
-#ifndef PONG_GAMEPLAY_H_
-#define PONG_GAMEPLAY_H_
-
 #include <pong_enums.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include "smc_queue.h"
 #include <pong_main.h> // Get checks and display width
+
+#ifndef PONG_GAMEPLAY_H_
+#define PONG_GAMEPLAY_H_
 
 #define PADDLE_WIDTH 1
 #define PADDLE_HEIGHT 3
